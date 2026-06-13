@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:modbus_studio/features/inspector/device_inspector_screen.dart';
 import 'package:modbus_studio/providers/radar_provider.dart';
 import 'package:modbus_studio/src/rust/frb_generated.dart';
 
@@ -102,46 +103,55 @@ class RadarScreen extends HookConsumerWidget {
                             final isFast = device.latencyMs < 50;
                             final statusColor = isFast ? CupertinoColors.systemGreen : CupertinoColors.systemOrange;
 
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF1C1C1E).withValues(alpha:0.7),
-                                      border: Border.all(color: const Color(0xFF2C2C2E).withValues(alpha:0.5)),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    padding: const EdgeInsets.all(16),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            color: statusColor.withValues(alpha:0.15),
-                                            shape: BoxShape.circle,
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  CupertinoPageRoute(
+                                    builder: (context) => DeviceInspectorScreen(ipAddress: device.ip),
+                                  ),
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF1C1C1E).withValues(alpha:0.7),
+                                        border: Border.all(color: const Color(0xFF2C2C2E).withValues(alpha:0.5)),
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      padding: const EdgeInsets.all(16),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              color: statusColor.withValues(alpha:0.15),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(CupertinoIcons.device_laptop, color: statusColor, size: 20),
                                           ),
-                                          child: Icon(CupertinoIcons.device_laptop, color: statusColor, size: 20),
-                                        ),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(device.ip, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: CupertinoColors.white)),
-                                              const SizedBox(height: 4),
-                                              Text(device.status, style: TextStyle(fontSize: 13, color: statusColor.withValues(alpha:0.8))),
-                                            ],
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(device.ip, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: CupertinoColors.white)),
+                                                const SizedBox(height: 4),
+                                                Text(device.status, style: TextStyle(fontSize: 13, color: statusColor.withValues(alpha:0.8))),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                        Text('${device.latencyMs}ms', style: const TextStyle(fontSize: 15, fontFamily: 'Courier', color: CupertinoColors.systemGrey2)),
-                                      ],
+                                          const Icon(CupertinoIcons.chevron_right, color: CupertinoColors.systemGrey),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuart),
+                                ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.2, end: 0, curve: Curves.easeOutQuart),
+                              ),
                             );
                           },
                         ),
