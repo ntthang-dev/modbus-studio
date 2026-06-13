@@ -1,6 +1,7 @@
 use crate::frb_generated::StreamSink;
-use rand::RngExt;
-use tokio::time::{sleep, Duration};
+use std::time::Duration;
+use tokio::net::TcpStream;
+use tokio::time::timeout;
 
 pub struct RadarDevice {
     pub ip: String,
@@ -8,38 +9,44 @@ pub struct RadarDevice {
     pub status: String,
 }
 
-pub async fn start_mock_radar_scan(sink: StreamSink<RadarDevice>) {
-    // Ping 255 IP addresses (mock)
+pub async fn start_radar_scan(subnet: String, sink: StreamSink<RadarDevice>) {
+    // We will spawn 254 tasks to scan the subnet concurrently
+    let mut handles = vec![];
+
     for i in 1..=254 {
-        // Simulate non-blocking ping delay (very fast)
-        let delay_ms = {
-            let mut rng = rand::rng();
-            rng.random_range(2..10)
-        };
-        sleep(Duration::from_millis(delay_ms)).await;
-
-        // Roughly 10% chance to "find" a device to simulate real-world scatter
-        let (is_found, latency) = {
-            let mut rng = rand::rng();
-            (rng.random_bool(0.10), rng.random_range(1..150))
-        };
-
-        if is_found {
-            let status = if latency < 50 {
-                "Online (Fast)".to_string()
-            } else if latency < 100 {
-                "Online (Moderate)".to_string()
-            } else {
-                "Online (Slow)".to_string()
-            };
-
-            let device = RadarDevice {
-                ip: format!("192.168.1.{}", i),
-                latency_ms: latency,
-                status,
-            };
+        let ip = format!("{}.{}", subnet, i);
+        let sink_clone = sink.clone();
+        
+        let handle = tokio::spawn(async move {
+            let start = std::time::Instant::now();
+            let addr = format!("{}:502", ip);
             
-            let _ = sink.add(device);
-        }
+            // Very short timeout for scanning local networks
+            if let Ok(Ok(_)) = timeout(Duration::from_millis(300), TcpStream::connect(&addr)).await {
+                let latency = start.elapsed().as_millis() as u16;
+                
+                let status = if latency < 50 {
+                    "Online (Fast)".to_string()
+                } else if latency < 100 {
+                    "Online (Moderate)".to_string()
+                } else {
+                    "Online (Slow)".to_string()
+                };
+
+                let device = RadarDevice {
+                    ip,
+                    latency_ms: latency,
+                    status,
+                };
+                
+                let _ = sink_clone.add(device);
+            }
+        });
+        handles.push(handle);
+    }
+
+    // Wait for all scan tasks to finish
+    for handle in handles {
+        let _ = handle.await;
     }
 }

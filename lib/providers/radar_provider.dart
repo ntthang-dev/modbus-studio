@@ -33,7 +33,7 @@ class RadarNotifier extends Notifier<RadarState> {
     state = RadarState(isScanning: true, devices: []);
 
     _subscription?.cancel();
-    _subscription = startMockRadarScan().listen(
+    _subscription = startRadarScan(subnet: "192.168.1").listen(
       (device) {
         state = state.copyWith(devices: [...state.devices, device]);
       },

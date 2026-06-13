@@ -39,7 +39,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.12.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1073646417;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 290944618;
 
 // Section: executor
 
@@ -203,7 +203,7 @@ fn wire__crate__api__client__ModbusClient_read_holding_registers_impl(
         },
     )
 }
-fn wire__crate__api__scanner__start_mock_radar_scan_impl(
+fn wire__crate__api__scanner__start_radar_scan_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -211,7 +211,7 @@ fn wire__crate__api__scanner__start_mock_radar_scan_impl(
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "start_mock_radar_scan",
+            debug_name: "start_radar_scan",
             port: Some(port_),
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
@@ -225,6 +225,7 @@ fn wire__crate__api__scanner__start_mock_radar_scan_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_subnet = <String>::sse_decode(&mut deserializer);
             let api_sink = <StreamSink<
                 crate::api::scanner::RadarDevice,
                 flutter_rust_bridge::for_generated::SseCodec,
@@ -234,7 +235,7 @@ fn wire__crate__api__scanner__start_mock_radar_scan_impl(
                 transform_result_sse::<_, ()>(
                     (move || async move {
                         let output_ok = Result::<_, ()>::Ok({
-                            crate::api::scanner::start_mock_radar_scan(api_sink).await;
+                            crate::api::scanner::start_radar_scan(api_subnet, api_sink).await;
                         })?;
                         Ok(output_ok)
                     })()
@@ -399,9 +400,7 @@ fn pde_ffi_dispatcher_primary_impl(
             rust_vec_len,
             data_len,
         ),
-        4 => {
-            wire__crate__api__scanner__start_mock_radar_scan_impl(port, ptr, rust_vec_len, data_len)
-        }
+        4 => wire__crate__api__scanner__start_radar_scan_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }

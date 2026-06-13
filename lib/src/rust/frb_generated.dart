@@ -65,7 +65,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => 1073646417;
+  int get rustContentHash => 290944618;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -92,7 +92,7 @@ abstract class RustLibApi extends BaseApi {
     required int quantity,
   });
 
-  Stream<RadarDevice> crateApiScannerStartMockRadarScan();
+  Stream<RadarDevice> crateApiScannerStartRadarScan({required String subnet});
 
   RustArcIncrementStrongCountFnType
   get rust_arc_increment_strong_count_ModbusClient;
@@ -224,13 +224,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Stream<RadarDevice> crateApiScannerStartMockRadarScan() {
+  Stream<RadarDevice> crateApiScannerStartRadarScan({required String subnet}) {
     final sink = RustStreamSink<RadarDevice>();
     unawaited(
       handler.executeNormal(
         NormalTask(
           callFfi: (port_) {
             final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_String(subnet, serializer);
             sse_encode_StreamSink_radar_device_Sse(sink, serializer);
             pdeCallFfi(
               generalizedFrbRustBinding,
@@ -243,8 +244,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             decodeSuccessData: sse_decode_unit,
             decodeErrorData: null,
           ),
-          constMeta: kCrateApiScannerStartMockRadarScanConstMeta,
-          argValues: [sink],
+          constMeta: kCrateApiScannerStartRadarScanConstMeta,
+          argValues: [subnet, sink],
           apiImpl: this,
         ),
       ),
@@ -252,10 +253,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return sink.stream;
   }
 
-  TaskConstMeta get kCrateApiScannerStartMockRadarScanConstMeta =>
+  TaskConstMeta get kCrateApiScannerStartRadarScanConstMeta =>
       const TaskConstMeta(
-        debugName: "start_mock_radar_scan",
-        argNames: ["sink"],
+        debugName: "start_radar_scan",
+        argNames: ["subnet", "sink"],
       );
 
   RustArcIncrementStrongCountFnType
