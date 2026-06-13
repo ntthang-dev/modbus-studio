@@ -58,13 +58,17 @@ class DeviceInspectorScreen extends HookConsumerWidget {
           client = await ModbusClient.connect(ip: ipAddress, port: 502);
           updateState(state.value.copyWith(isConnecting: false, isConnected: true, clearError: true));
           
+          bool isPolling = false;
           pollingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-            if (client == null || !isMounted) return;
+            if (client == null || !isMounted || isPolling) return;
+            isPolling = true;
             try {
               final data = await client!.readHoldingRegisters(address: 0, quantity: 10);
               updateState(state.value.copyWith(registers: data.toList(), clearError: true));
             } catch (e) {
               updateState(state.value.copyWith(error: "Poll error: ${e.toString()}"));
+            } finally {
+              isPolling = false;
             }
           });
         } catch (e) {
