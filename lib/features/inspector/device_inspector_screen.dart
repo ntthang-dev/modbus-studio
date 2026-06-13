@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:modbus_studio/src/rust/api/client.dart';
+import 'package:modbus_studio/features/inspector/widgets/write_control_card.dart';
 
 class InspectorState {
   final bool isConnecting;
@@ -43,9 +44,9 @@ class DeviceInspectorScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = useState<InspectorState>(InspectorState(isConnecting: true));
+    final clientRef = useRef<ModbusClient?>(null);
 
     useEffect(() {
-      ModbusClient? client;
       Timer? pollingTimer;
       bool isMounted = true;
 
@@ -55,15 +56,16 @@ class DeviceInspectorScreen extends HookConsumerWidget {
 
       Future<void> connect() async {
         try {
-          client = await ModbusClient.connect(ip: ipAddress, port: 502);
+          final client = await ModbusClient.connect(ip: ipAddress, port: 502);
+          clientRef.value = client;
           updateState(state.value.copyWith(isConnecting: false, isConnected: true, clearError: true));
           
           bool isPolling = false;
           pollingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-            if (client == null || !isMounted || isPolling) return;
+            if (clientRef.value == null || !isMounted || isPolling) return;
             isPolling = true;
             try {
-              final data = await client!.readHoldingRegisters(address: 0, quantity: 10);
+              final data = await clientRef.value!.readHoldingRegisters(address: 0, quantity: 10);
               updateState(state.value.copyWith(registers: data.toList(), clearError: true));
             } catch (e) {
               updateState(state.value.copyWith(error: "Poll error: ${e.toString()}"));
@@ -81,9 +83,19 @@ class DeviceInspectorScreen extends HookConsumerWidget {
       return () {
         isMounted = false;
         pollingTimer?.cancel();
-        client?.disconnect();
+        clientRef.value?.disconnect();
       };
     }, [ipAddress]);
+
+    Future<void> handleWriteCoil(int address, bool value) async {
+      if (clientRef.value == null) throw Exception("Not connected");
+      await clientRef.value!.writeSingleCoil(address: address, value: value);
+    }
+
+    Future<void> handleWriteRegister(int address, int value) async {
+      if (clientRef.value == null) throw Exception("Not connected");
+      await clientRef.value!.writeSingleRegister(address: address, value: value);
+    }
 
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFF0A0A0C),
@@ -103,6 +115,12 @@ class DeviceInspectorScreen extends HookConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(state.value.error!, style: const TextStyle(color: CupertinoColors.systemRed)),
               ),
+
+            // Write Control
+            WriteControlCard(
+              onWriteCoil: state.value.isConnected ? handleWriteCoil : null,
+              onWriteRegister: state.value.isConnected ? handleWriteRegister : null,
+            ),
 
             // Registers Grid
             Expanded(
