@@ -41,3 +41,21 @@ impl ModbusClient {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_connect_connection_refused() {
+        // Try connecting to a local port that is highly likely closed (9999)
+        let result = ModbusClient::connect("127.0.0.1".to_string(), 9999).await;
+        
+        // Ensure it returns an error
+        assert!(result.is_err());
+        
+        let err_msg = result.err().unwrap().to_string();
+        // The error message should indicate connection refused or similar TCP error
+        assert!(err_msg.contains("Connection refused") || err_msg.contains("Connection reset by peer"));
+    }
+}
