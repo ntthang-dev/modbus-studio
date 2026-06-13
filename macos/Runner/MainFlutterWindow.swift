@@ -8,6 +8,13 @@ class MainFlutterWindow: NSWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
+    // Window Polish (Liquid Glass Native Feel)
+    self.titleVisibility = .hidden
+    self.titlebarAppearsTransparent = true
+    self.styleMask.insert(.fullSizeContentView)
+    self.isOpaque = false
+    self.backgroundColor = .clear
+
     RegisterGeneratedPlugins(registry: flutterViewController)
 
     super.awakeFromNib()
