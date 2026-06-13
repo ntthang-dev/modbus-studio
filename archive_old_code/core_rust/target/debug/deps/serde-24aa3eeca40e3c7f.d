@@ -1,0 +1,12 @@
+/Users/ristresso/Developers/modbus_scan/modbus_scada_app/core_rust/target/debug/deps/serde-24aa3eeca40e3c7f.d: /Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/ristresso/Developers/modbus_scan/modbus_scada_app/core_rust/target/debug/build/serde-2b2aafd815112231/out/private.rs
+
+/Users/ristresso/Developers/modbus_scan/modbus_scada_app/core_rust/target/debug/deps/libserde-24aa3eeca40e3c7f.rmeta: /Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /Users/ristresso/Developers/modbus_scan/modbus_scada_app/core_rust/target/debug/build/serde-2b2aafd815112231/out/private.rs
+
+/Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/Users/ristresso/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/Users/ristresso/Developers/modbus_scan/modbus_scada_app/core_rust/target/debug/build/serde-2b2aafd815112231/out/private.rs:
+
+# env-dep:OUT_DIR=/Users/ristresso/Developers/modbus_scan/modbus_scada_app/core_rust/target/debug/build/serde-2b2aafd815112231/out

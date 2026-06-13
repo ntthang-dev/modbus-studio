@@ -1,0 +1,258 @@
+Last login: Fri Jun 12 12:33:02 on ttys000
+ristresso@MacBook-Pro-cua-zotano modbus_scan % python modbus_scanner.py 192.168.1.10
+zsh: command not found: python
+ristresso@MacBook-Pro-cua-zotano modbus_scan % python3 ython modbus_scanner.py 192.168.1.10
+/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/ristresso/Developers/modbus_scan/ython': [Errno 2] No such file or directory
+ristresso@MacBook-Pro-cua-zotano modbus_scan % python3 modbus_scanner.py 192.168.1.10 
+Traceback (most recent call last):
+  File "/Users/ristresso/Developers/modbus_scan/modbus_scanner.py", line 3, in <module>
+    from pymodbus.client import ModbusTcpClient
+ModuleNotFoundError: No module named 'pymodbus'
+ristresso@MacBook-Pro-cua-zotano modbus_scan % uv instal pymodbus
+error: unrecognized subcommand 'instal'
+
+  tip: a similar subcommand exists: 'init'
+
+Usage: uv [OPTIONS] <COMMAND>
+
+For more information, try '--help'.
+ristresso@MacBook-Pro-cua-zotano modbus_scan %   source venv/bin/activate 
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python auto_scan_ip.py 192.168.1.0/24  
+[*] Bắt đầu quét toàn bộ dải IP 192.168.1.0/24 (tổng 256 IP) với 100 luồng...
+[+] Tìm thấy cổng 502 đang mở tại IP: 192.168.1.50
+[+] Tìm thấy cổng 502 đang mở tại IP: 192.168.1.10
+    -> [Modbus OK] IP: 192.168.1.10 - Các Slave ID (Unit ID) đang hoạt động: 1 (Có phản hồi - Mã lỗi: 3), 2 (Có phản hồi - Mã lỗi: 3), 3 (Có phản hồi - Mã lỗi: 3), 254 (Có phản hồi - Mã lỗi: 4), 255 (Có phản hồi - Mã lỗi: 4)
+    -> [Modbus OK] IP: 192.168.1.50 - Các Slave ID (Unit ID) đang hoạt động: 1, 2 (Có phản hồi - Mã lỗi: 11), 3 (Có phản hồi - Mã lỗi: 11), 254 (Có phản hồi - Mã lỗi: 11), 255 (Có phản hồi - Mã lỗi: 11)
+
+==================================================
+[*] HOÀN TẤT QUÁ TRÌNH QUÉT.
+[*] Tổng cộng tìm thấy 2 thiết bị Modbus/có cổng 502 hoạt động.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python modbus_scanner.py 192.168.1.50
+[*] Đang kết nối tới 192.168.1.50:502 (Unit ID: 1)...
+[+] Kết nối thành công!
+[*] Đang đọc 10 giá trị từ địa chỉ 0 bằng Function Code 3...
+[+] Kết quả (Holding Registers): [0, 17318, 24904, 17740, 52019, 48515, 4719, 17351, 6554, 17349]
+[*] Đã đóng kết nối.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % ython modbus_scanner.py 192.168.1.50 -p 502 -u 1 -a 0 -c 20 -fc 3
+zsh: command not found: ython
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python modbus_scanner.py 192.168.1.50 -p 502 -u 1 -a 0 -c 20 -fc 3
+[*] Đang kết nối tới 192.168.1.50:502 (Unit ID: 1)...
+[+] Kết nối thành công!
+[*] Đang đọc 20 giá trị từ địa chỉ 0 bằng Function Code 3...
+[+] Kết quả (Holding Registers): [0, 17329, 3932, 17740, 52019, 48381, 62390, 17351, 6554, 17349, 13107, 17351, 22938, 17405, 0, 17407, 32768, 17404, 32768, 49023]
+[*] Đã đóng kết nối.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python auto_scan_ip.py 192.168.1.0/50                             
+[!] Dải IP nhập vào không hợp lệ: '192.168.1.0/50' does not appear to be an IPv4 or IPv6 network
+    Vui lòng dùng định dạng CIDR, ví dụ: 192.168.1.0/24
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python auto_scan_ip.py 192.168.1.0/24
+[*] Bắt đầu quét toàn bộ dải IP 192.168.1.0/24 (tổng 256 IP) với 100 luồng...
+[+] Tìm thấy cổng 502 đang mở tại IP: 192.168.1.50
+[+] Tìm thấy cổng 502 đang mở tại IP: 192.168.1.10
+    -> [Modbus OK] IP: 192.168.1.10 - Các Slave ID (Unit ID) đang hoạt động: 1 (Có phản hồi - Mã lỗi: 3), 2 (Có phản hồi - Mã lỗi: 3), 3 (Có phản hồi - Mã lỗi: 3), 254 (Có phản hồi - Mã lỗi: 4), 255 (Có phản hồi - Mã lỗi: 4)
+    -> [Modbus OK] IP: 192.168.1.50 - Các Slave ID (Unit ID) đang hoạt động: 1, 2 (Có phản hồi - Mã lỗi: 11), 3 (Có phản hồi - Mã lỗi: 11), 254 (Có phản hồi - Mã lỗi: 11), 255 (Có phản hồi - Mã lỗi: 11)
+
+==================================================
+[*] HOÀN TẤT QUÁ TRÌNH QUÉT.
+[*] Tổng cộng tìm thấy 2 thiết bị Modbus/có cổng 502 hoạt động.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python auto_scan_ip.py 192.168.2.0/24
+[*] Bắt đầu quét toàn bộ dải IP 192.168.2.0/24 (tổng 256 IP) với 100 luồng...
+
+==================================================
+[*] HOÀN TẤT QUÁ TRÌNH QUÉT.
+[!] Không tìm thấy bất kỳ thiết bị Modbus nào trong dải IP vừa quét.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python modbus_scanner.py 192.168.1.10 -p 502 -u 0              
+[*] Đang kết nối tới 192.168.1.10:502 (Unit ID: 0)...
+[+] Kết nối thành công!
+[*] Đang đọc 10 giá trị từ địa chỉ 0 bằng Function Code 3...
+[!] Lỗi đọc dữ liệu: Exception Response(131, 3, IllegalValue)
+[*] Đã đóng kết nối.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python modbus_scanner.py 192.168.1.10 -p 502 -u 0 -a 0 -c 20 -fc 3
+[*] Đang kết nối tới 192.168.1.10:502 (Unit ID: 0)...
+[+] Kết nối thành công!
+[*] Đang đọc 20 giá trị từ địa chỉ 0 bằng Function Code 3...
+[!] Lỗi đọc dữ liệu: Exception Response(131, 3, IllegalValue)
+[*] Đã đóng kết nối.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python modbus_scanner.py 192.168.1.10 -p 502 -u 0 -a 0 -c 20 -fc 4
+[*] Đang kết nối tới 192.168.1.10:502 (Unit ID: 0)...
+[+] Kết nối thành công!
+[*] Đang đọc 20 giá trị từ địa chỉ 0 bằng Function Code 4...
+[!] Lỗi đọc dữ liệu: Modbus Error: [Input/Output] Modbus Error: [Invalid Message] No response received, expected at least 8 bytes (0 received)
+[*] Đã đóng kết nối.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python modbus_scanner.py 192.168.1.10 -p 502 -u 0 -a 0 -c 20 -fc 3
+[*] Đang kết nối tới 192.168.1.10:502 (Unit ID: 0)...
+[+] Kết nối thành công!
+[*] Đang đọc 20 giá trị từ địa chỉ 0 bằng Function Code 3...
+[!] Lỗi đọc dữ liệu: Exception Response(131, 3, IllegalValue)
+[*] Đã đóng kết nối.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python modbus_scanner.py 192.168.1.10 -p 502 -u 0 -a 0 -c 20 -fc 2
+[*] Đang kết nối tới 192.168.1.10:502 (Unit ID: 0)...
+[+] Kết nối thành công!
+[*] Đang đọc 20 giá trị từ địa chỉ 0 bằng Function Code 2...
+[!] Lỗi đọc dữ liệu: Modbus Error: [Input/Output] Modbus Error: [Invalid Message] No response received, expected at least 8 bytes (0 received)
+[*] Đã đóng kết nối.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python modbus_scanner.py 192.168.1.10 -p 502 -u 0 -a 0 -c 20 -fc 1
+[*] Đang kết nối tới 192.168.1.10:502 (Unit ID: 0)...
+[+] Kết nối thành công!
+[*] Đang đọc 20 giá trị từ địa chỉ 0 bằng Function Code 1...
+[!] Lỗi đọc dữ liệu: Modbus Error: [Input/Output] Modbus Error: [Invalid Message] No response received, expected at least 8 bytes (0 received)
+[*] Đã đóng kết nối.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python auto_scan_ip.py 192.168.1.0/24 --full-slave
+[*] Bắt đầu quét mạng 192.168.1.0/24 (tổng 256 IP)...
+[*] Chế độ quét sâu: Quét TẤT CẢ Slave ID từ 1 đến 255.
+[+] Tìm thấy cổng 502 đang mở tại IP: 192.168.1.50
+[+] Tìm thấy cổng 502 đang mở tại IP: 192.168.1.10
+    -> [Modbus OK] IP: 192.168.1.10 - Các Slave ID đang hoạt động: 1 (Mã lỗi: 3), 2 (Mã lỗi: 3), 3 (Mã lỗi: 3), 4 (Mã lỗi: 3), 5 (Mã lỗi: 3), 6 (Mã lỗi: 3), 7 (Mã lỗi: 3), 8 (Mã lỗi: 3), 9 (Mã lỗi: 4), 10 (Mã lỗi: 3), 11 (Mã lỗi: 3), 12 (Mã lỗi: 4), 13 (Mã lỗi: 4), 14 (Mã lỗi: 4), 15 (Mã lỗi: 4), 16 (Mã lỗi: 4), 17 (Mã lỗi: 4), 18 (Mã lỗi: 4), 19 (Mã lỗi: 4), 20 (Mã lỗi: 4), 21 (Mã lỗi: 4), 22 (Mã lỗi: 4), 23 (Mã lỗi: 4), 24 (Mã lỗi: 4), 25 (Mã lỗi: 4), 26 (Mã lỗi: 4), 27 (Mã lỗi: 4), 28 (Mã lỗi: 4), 29 (Mã lỗi: 4), 30 (Mã lỗi: 4), 31 (Mã lỗi: 4), 32 (Mã lỗi: 4), 33 (Mã lỗi: 4), 34 (Mã lỗi: 4), 35 (Mã lỗi: 4), 36 (Mã lỗi: 4), 37 (Mã lỗi: 4), 38 (Mã lỗi: 4), 39 (Mã lỗi: 4), 40 (Mã lỗi: 4), 41 (Mã lỗi: 4), 42 (Mã lỗi: 4), 43 (Mã lỗi: 4), 44 (Mã lỗi: 4), 45 (Mã lỗi: 4), 46 (Mã lỗi: 4), 47 (Mã lỗi: 4), 48 (Mã lỗi: 4), 49 (Mã lỗi: 4), 50 (Mã lỗi: 4), 51 (Mã lỗi: 4), 52 (Mã lỗi: 4), 53 (Mã lỗi: 4), 54 (Mã lỗi: 4), 55 (Mã lỗi: 4), 56 (Mã lỗi: 4), 57 (Mã lỗi: 4), 58 (Mã lỗi: 4), 59 (Mã lỗi: 4), 60 (Mã lỗi: 4), 61 (Mã lỗi: 4), 62 (Mã lỗi: 4), 63 (Mã lỗi: 4), 64 (Mã lỗi: 4), 65 (Mã lỗi: 4), 66 (Mã lỗi: 4), 67 (Mã lỗi: 4), 68 (Mã lỗi: 4), 69 (Mã lỗi: 4), 70 (Mã lỗi: 4), 71 (Mã lỗi: 4), 72 (Mã lỗi: 4), 73 (Mã lỗi: 4), 74 (Mã lỗi: 4), 75 (Mã lỗi: 4), 76 (Mã lỗi: 4), 77 (Mã lỗi: 4), 78 (Mã lỗi: 4), 79 (Mã lỗi: 4), 80 (Mã lỗi: 4), 81 (Mã lỗi: 4), 82 (Mã lỗi: 4), 83 (Mã lỗi: 4), 84 (Mã lỗi: 4), 85 (Mã lỗi: 4), 86 (Mã lỗi: 4), 87 (Mã lỗi: 4), 88 (Mã lỗi: 4), 89 (Mã lỗi: 4), 90 (Mã lỗi: 4), 91 (Mã lỗi: 4), 92 (Mã lỗi: 4), 93 (Mã lỗi: 4), 94 (Mã lỗi: 4), 95 (Mã lỗi: 4), 96 (Mã lỗi: 4), 97 (Mã lỗi: 4), 98 (Mã lỗi: 4), 99 (Mã lỗi: 4), 100 (Mã lỗi: 4), 101 (Mã lỗi: 4), 102 (Mã lỗi: 4), 103 (Mã lỗi: 4), 104 (Mã lỗi: 4), 105 (Mã lỗi: 4), 106 (Mã lỗi: 4), 107 (Mã lỗi: 4), 108 (Mã lỗi: 4), 109 (Mã lỗi: 4), 110 (Mã lỗi: 4), 111 (Mã lỗi: 4), 112 (Mã lỗi: 4), 113 (Mã lỗi: 4), 114 (Mã lỗi: 4), 115 (Mã lỗi: 4), 116 (Mã lỗi: 4), 117 (Mã lỗi: 4), 118 (Mã lỗi: 4), 119 (Mã lỗi: 4), 120 (Mã lỗi: 4), 121 (Mã lỗi: 4), 122 (Mã lỗi: 4), 123 (Mã lỗi: 4), 124 (Mã lỗi: 4), 125 (Mã lỗi: 4), 126 (Mã lỗi: 4), 127 (Mã lỗi: 4), 128 (Mã lỗi: 4), 129 (Mã lỗi: 4), 130 (Mã lỗi: 4), 131 (Mã lỗi: 4), 132 (Mã lỗi: 4), 133 (Mã lỗi: 4), 134 (Mã lỗi: 4), 135 (Mã lỗi: 4), 136 (Mã lỗi: 4), 137 (Mã lỗi: 4), 138 (Mã lỗi: 4), 139 (Mã lỗi: 4), 140 (Mã lỗi: 4), 141 (Mã lỗi: 4), 142 (Mã lỗi: 4), 143 (Mã lỗi: 4), 144 (Mã lỗi: 4), 145 (Mã lỗi: 4), 146 (Mã lỗi: 4), 147 (Mã lỗi: 4), 148 (Mã lỗi: 4), 149 (Mã lỗi: 4), 150 (Mã lỗi: 4), 151 (Mã lỗi: 4), 152 (Mã lỗi: 4), 153 (Mã lỗi: 4), 154 (Mã lỗi: 4), 155 (Mã lỗi: 4), 156 (Mã lỗi: 4), 157 (Mã lỗi: 4), 158 (Mã lỗi: 4), 159 (Mã lỗi: 4), 160 (Mã lỗi: 4), 161 (Mã lỗi: 4), 162 (Mã lỗi: 4), 163 (Mã lỗi: 4), 164 (Mã lỗi: 4), 165 (Mã lỗi: 4), 166 (Mã lỗi: 4), 167 (Mã lỗi: 4), 168 (Mã lỗi: 4), 169 (Mã lỗi: 4), 170 (Mã lỗi: 4), 171 (Mã lỗi: 4), 172 (Mã lỗi: 4), 173 (Mã lỗi: 4), 174 (Mã lỗi: 4), 175 (Mã lỗi: 4), 176 (Mã lỗi: 4), 177 (Mã lỗi: 4), 178 (Mã lỗi: 4), 179 (Mã lỗi: 4), 180 (Mã lỗi: 4), 181 (Mã lỗi: 4), 182 (Mã lỗi: 4), 183 (Mã lỗi: 4), 184 (Mã lỗi: 4), 185 (Mã lỗi: 4), 186 (Mã lỗi: 4), 187 (Mã lỗi: 4), 188 (Mã lỗi: 4), 189 (Mã lỗi: 4), 190 (Mã lỗi: 4), 191 (Mã lỗi: 4), 192 (Mã lỗi: 4), 193 (Mã lỗi: 4), 194 (Mã lỗi: 4), 195 (Mã lỗi: 4), 196 (Mã lỗi: 4), 197 (Mã lỗi: 4), 198 (Mã lỗi: 4), 199 (Mã lỗi: 4), 200 (Mã lỗi: 4), 201 (Mã lỗi: 4), 202 (Mã lỗi: 4), 203 (Mã lỗi: 4), 204 (Mã lỗi: 4), 205 (Mã lỗi: 4), 206 (Mã lỗi: 4), 207 (Mã lỗi: 4), 208 (Mã lỗi: 4), 209 (Mã lỗi: 4), 210 (Mã lỗi: 4), 211 (Mã lỗi: 4), 212 (Mã lỗi: 4), 213 (Mã lỗi: 4), 214 (Mã lỗi: 4), 215 (Mã lỗi: 4), 216 (Mã lỗi: 4), 217 (Mã lỗi: 4), 218 (Mã lỗi: 4), 219 (Mã lỗi: 4), 220 (Mã lỗi: 4), 221 (Mã lỗi: 4), 222 (Mã lỗi: 4), 223 (Mã lỗi: 4), 224 (Mã lỗi: 4), 225 (Mã lỗi: 4), 226 (Mã lỗi: 4), 227 (Mã lỗi: 4), 228 (Mã lỗi: 4), 229 (Mã lỗi: 4), 230 (Mã lỗi: 4), 231 (Mã lỗi: 4), 232 (Mã lỗi: 4), 233 (Mã lỗi: 4), 234 (Mã lỗi: 4), 235 (Mã lỗi: 4), 236 (Mã lỗi: 4), 237 (Mã lỗi: 4), 238 (Mã lỗi: 4), 239 (Mã lỗi: 4), 240 (Mã lỗi: 4), 241 (Mã lỗi: 4), 242 (Mã lỗi: 4), 243 (Mã lỗi: 4), 244 (Mã lỗi: 4), 245 (Mã lỗi: 4), 246 (Mã lỗi: 4), 247 (Mã lỗi: 4), 248 (Mã lỗi: 4), 249 (Mã lỗi: 4), 250 (Mã lỗi: 4), 251 (Mã lỗi: 4), 252 (Mã lỗi: 4), 253 (Mã lỗi: 4), 254 (Mã lỗi: 4), 255 (Mã lỗi: 4)
+Connection to (192.168.1.50, 502) failed: timed out
+^C
+^X                                                 
+^Z
+zsh: suspended  python auto_scan_ip.py 192.168.1.0/24 --full-slave
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % 
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python scan_registers.py 192.168.1.10 -u 0 -fc 3 
+[*] Bắt đầu dò từng địa chỉ từ 0 đến 65535...
+[*] Mục tiêu: 192.168.1.10:502 | Slave ID: 0 | Function Code: 3
+[*] Vui lòng đợi, quá trình chạy 65536 địa chỉ sẽ mất một chút thời gian...
+[+] Tìm thấy! Địa chỉ: 40000 => Giá trị: 27179
+[+] Tìm thấy! Địa chỉ: 40002 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 40004 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 40005 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 40007 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 40008 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 40009 => Giá trị: 27180
+[+] Tìm thấy! Địa chỉ: 40540 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 41264 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50000 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50001 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50002 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50003 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50004 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50005 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50006 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50100 => Giá trị: 65535
+[+] Tìm thấy! Địa chỉ: 50101 => Giá trị: 8159
+[+] Tìm thấy! Địa chỉ: 50102 => Giá trị: 16368
+[+] Tìm thấy! Địa chỉ: 50103 => Giá trị: 48974
+[+] Tìm thấy! Địa chỉ: 50104 => Giá trị: 111
+[+] Tìm thấy! Địa chỉ: 50105 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50106 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50107 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50108 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 50109 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 51000 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51001 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51002 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51003 => Giá trị: 375
+[+] Tìm thấy! Địa chỉ: 51004 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51007 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51010 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51011 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51025 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51026 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51027 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51028 => Giá trị: 546
+[+] Tìm thấy! Địa chỉ: 51029 => Giá trị: 3990
+[+] Tìm thấy! Địa chỉ: 51032 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51035 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51036 => Giá trị: 32767
+[+] Tìm thấy! Địa chỉ: 51279 => Giá trị: 7243
+[+] Tìm thấy! Địa chỉ: 51282 => Giá trị: 486
+[+] Tìm thấy! Địa chỉ: 51283 => Giá trị: 1000
+[+] Tìm thấy! Địa chỉ: 51284 => Giá trị: 512
+[+] Tìm thấy! Địa chỉ: 51285 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 51286 => Giá trị: 615
+[+] Tìm thấy! Địa chỉ: 51304 => Giá trị: 7400
+[+] Tìm thấy! Địa chỉ: 51307 => Giá trị: 65
+[+] Tìm thấy! Địa chỉ: 51308 => Giá trị: 1000
+[+] Tìm thấy! Địa chỉ: 51309 => Giá trị: 512
+[+] Tìm thấy! Địa chỉ: 51310 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 51311 => Giá trị: 688
+[+] Tìm thấy! Địa chỉ: 51329 => Giá trị: 18337
+[+] Tìm thấy! Địa chỉ: 51332 => Giá trị: 115
+[+] Tìm thấy! Địa chỉ: 51333 => Giá trị: 1000
+[+] Tìm thấy! Địa chỉ: 51334 => Giá trị: 512
+[+] Tìm thấy! Địa chỉ: 51335 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 51336 => Giá trị: 641
+[+] Tìm thấy! Địa chỉ: 51354 => Giá trị: 7976
+[+] Tìm thấy! Địa chỉ: 51357 => Giá trị: 60
+[+] Tìm thấy! Địa chỉ: 51358 => Giá trị: 1000
+[+] Tìm thấy! Địa chỉ: 51359 => Giá trị: 512
+[+] Tìm thấy! Địa chỉ: 51360 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 51361 => Giá trị: 700
+[+] Tìm thấy! Địa chỉ: 51379 => Giá trị: 15192
+[+] Tìm thấy! Địa chỉ: 51382 => Giá trị: 72
+[+] Tìm thấy! Địa chỉ: 51383 => Giá trị: 1000
+[+] Tìm thấy! Địa chỉ: 51384 => Giá trị: 512
+[+] Tìm thấy! Địa chỉ: 51385 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 51386 => Giá trị: 622
+[+] Tìm thấy! Địa chỉ: 51404 => Giá trị: 12715
+[+] Tìm thấy! Địa chỉ: 51407 => Giá trị: 38
+[+] Tìm thấy! Địa chỉ: 51408 => Giá trị: 1000
+[+] Tìm thấy! Địa chỉ: 51409 => Giá trị: 512
+[+] Tìm thấy! Địa chỉ: 51410 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 51411 => Giá trị: 636
+[+] Tìm thấy! Địa chỉ: 51429 => Giá trị: 7964
+[+] Tìm thấy! Địa chỉ: 51433 => Giá trị: 1000
+[+] Tìm thấy! Địa chỉ: 51434 => Giá trị: 512
+[+] Tìm thấy! Địa chỉ: 51435 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 51436 => Giá trị: 693
+^R
+[*] Đang quét: 100.0% (65536/65536)
+==================================================
+[*] Quét hoàn tất trong 90.88 giây.
+[*] Tổng cộng tìm thấy 83 địa chỉ có chứa dữ liệu thực.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python scan_registers.py 192.168.1.10 -u 0 -fc 4 
+[*] Bắt đầu dò từng địa chỉ từ 0 đến 65535...
+[*] Mục tiêu: 192.168.1.10:502 | Slave ID: 0 | Function Code: 4
+[*] Vui lòng đợi, quá trình chạy 65536 địa chỉ sẽ mất một chút thời gian...
+[*] Đang quét: 100.0% (65536/65536)
+==================================================
+[*] Quét hoàn tất trong 697.03 giây.
+[*] Tổng cộng tìm thấy 0 địa chỉ có chứa dữ liệu thực.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python scan_registers.py 192.168.1.10 -u 1 -fc 3
+[*] Bắt đầu dò từng địa chỉ từ 0 đến 65535...
+[*] Mục tiêu: 192.168.1.10:502 | Slave ID: 1 | Function Code: 3
+[*] Vui lòng đợi, quá trình chạy 65536 địa chỉ sẽ mất một chút thời gian...
+[+] Tìm thấy! Địa chỉ: 32284 => Giá trị: 874
+[+] Tìm thấy! Địa chỉ: 33006 => Giá trị: 1
+[+] Tìm thấy! Địa chỉ: 33007 => Giá trị: 35
+[+] Tìm thấy! Địa chỉ: 33008 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 33009 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 65505 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 65509 => Giá trị: 1
+[+] Tìm thấy! Địa chỉ: 65520 => Giá trị: 33033
+[+] Tìm thấy! Địa chỉ: 65522 => Giá trị: 1
+[+] Tìm thấy! Địa chỉ: 65523 => Giá trị: 11
+[+] Tìm thấy! Địa chỉ: 65534 => Giá trị: 45057
+[+] Tìm thấy! Địa chỉ: 65535 => Giá trị: 1
+[*] Đang quét: 100.0% (65536/65536)
+==================================================
+[*] Quét hoàn tất trong 98.50 giây.
+[*] Tổng cộng tìm thấy 12 địa chỉ có chứa dữ liệu thực.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python scan_registers.py 192.168.1.10 -u 1 -fc 3
+[*] Bắt đầu dò từng địa chỉ từ 0 đến 65535...
+[*] Mục tiêu: 192.168.1.10:502 | Slave ID: 1 | Function Code: 3
+[*] Vui lòng đợi, quá trình chạy 65536 địa chỉ sẽ mất một chút thời gian...
+[+] Tìm thấy! Địa chỉ: 32284 => Giá trị: 883
+[+] Tìm thấy! Địa chỉ: 33006 => Giá trị: 1
+[+] Tìm thấy! Địa chỉ: 33007 => Giá trị: 35
+[+] Tìm thấy! Địa chỉ: 33008 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 33009 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 65505 => Giá trị: 0
+[+] Tìm thấy! Địa chỉ: 65509 => Giá trị: 1
+[+] Tìm thấy! Địa chỉ: 65520 => Giá trị: 33033
+[+] Tìm thấy! Địa chỉ: 65522 => Giá trị: 1
+[+] Tìm thấy! Địa chỉ: 65523 => Giá trị: 11
+[+] Tìm thấy! Địa chỉ: 65534 => Giá trị: 45057
+[+] Tìm thấy! Địa chỉ: 65535 => Giá trị: 1
+[*] Đang quét: 100.0% (65536/65536)
+==================================================
+[*] Quét hoàn tất trong 98.92 giây.
+[*] Tổng cộng tìm thấy 12 địa chỉ có chứa dữ liệu thực.
+(venv) ristresso@MacBook-Pro-cua-zotano modbus_scan % python scan_registers.py 192.168.1.10 -u 1 -fc 4
+[*] Bắt đầu dò từng địa chỉ từ 0 đến 65535...
+[*] Mục tiêu: 192.168.1.10:502 | Slave ID: 1 | Function Code: 4
+[*] Vui lòng đợi, quá trình chạy 65536 địa chỉ sẽ mất một chút thời gian...
+[*] Đang quét: 100.0% (65536/65536)
+==================================================
+[*] Quét hoàn tất trong 367.31 giây.
+[*] Tổng cộng tìm thấy 0 địa chỉ có chứa dữ liệu thực.
