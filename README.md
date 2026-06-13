@@ -8,6 +8,8 @@ A high-performance, edge-ready SCADA diagnostic tool built with Flutter (UI) and
 - **Active Historian (SCADA Engine):** An autonomous background Rust task manages continuous 1-second interval polling, robust reconnection handling, and synchronous SQLite logging.
 - **Real-Time Flutter UI:** Uses `flutter_rust_bridge` to funnel background telemetry to the UI via `StreamSink`. Features smooth 60fps glass-morphism designs.
 - **Write Operations (FC5 / FC6):** Inject commands directly into registers or coils.
+- **Scheduled Automations:** Perform recurring scheduled writes natively via the Rust background scheduler, persisting rules to SQLite.
+- **JavaScript Sandboxing:** Built-in `flutter_js` QuickJS sandbox allows users to inject custom JS code to evaluate Modbus registers and trigger autonomous cross-system actions (like logging Custom Alarms).
 - **Historical Charting:** Visualizes past polled values using `fl_chart`. 
 
 ## Architecture
@@ -53,3 +55,4 @@ The executable will be located at:
 - **Rust for IO:** Modbus TCP involves strict timeouts and byte parsing. Rust provides memory safety and fearless concurrency for pinging 255 IPs simultaneously.
 - **WAL Mode in SQLite:** The active historian writes every 1 second, while the UI reads every 2 seconds. Write-Ahead Logging (WAL) ensures readers never block writers.
 - **Native macOS Window:** `MainFlutterWindow.swift` is heavily customized to hide the standard titlebar (`titlebarAppearsTransparent`), allowing the Liquid Glass Flutter theme to stretch edge-to-edge.
+- **QuickJS for Custom Logic:** Use of `flutter_js` ensures high-performance, sandboxed Javascript execution without the heavy RAM and startup overhead of a Webview or native isolate evaluation. See `ADR-001`.
