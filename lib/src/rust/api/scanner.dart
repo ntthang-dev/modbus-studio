@@ -6,4 +6,29 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-String initScanner() => RustLib.instance.api.crateApiScannerInitScanner();
+Stream<RadarDevice> startMockRadarScan() =>
+    RustLib.instance.api.crateApiScannerStartMockRadarScan();
+
+class RadarDevice {
+  final String ip;
+  final int latencyMs;
+  final String status;
+
+  const RadarDevice({
+    required this.ip,
+    required this.latencyMs,
+    required this.status,
+  });
+
+  @override
+  int get hashCode => ip.hashCode ^ latencyMs.hashCode ^ status.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RadarDevice &&
+          runtimeType == other.runtimeType &&
+          ip == other.ip &&
+          latencyMs == other.latencyMs &&
+          status == other.status;
+}
