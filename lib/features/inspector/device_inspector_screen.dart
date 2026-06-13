@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:modbus_studio/src/rust/api/client.dart';
+import 'package:modbus_studio/src/rust/api/historian.dart';
 import 'package:modbus_studio/features/inspector/widgets/write_control_card.dart';
 
 class InspectorState {
@@ -47,7 +48,7 @@ class DeviceInspectorScreen extends HookConsumerWidget {
     final clientRef = useRef<ModbusClient?>(null);
 
     useEffect(() {
-      Timer? pollingTimer;
+      StreamSubscription? historianSub;
       bool isMounted = true;
 
       void updateState(InspectorState s) {
@@ -56,21 +57,18 @@ class DeviceInspectorScreen extends HookConsumerWidget {
 
       Future<void> connect() async {
         try {
+          // 1. Connect a separate client for Write operations
           final client = await ModbusClient.connect(ip: ipAddress, port: 502);
           clientRef.value = client;
           updateState(state.value.copyWith(isConnecting: false, isConnected: true, clearError: true));
           
-          bool isPolling = false;
-          pollingTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-            if (clientRef.value == null || !isMounted || isPolling) return;
-            isPolling = true;
-            try {
-              final data = await clientRef.value!.readHoldingRegisters(address: 0, quantity: 10);
-              updateState(state.value.copyWith(registers: data.toList(), clearError: true));
-            } catch (e) {
-              updateState(state.value.copyWith(error: "Poll error: ${e.toString()}"));
-            } finally {
-              isPolling = false;
+          // 2. Start the Active Rust Historian for polling and logging
+          final stream = startHistorianLoop(ip: ipAddress, port: 502, dbPath: "historian.db");
+          historianSub = stream.listen((HistorianData data) {
+            if (data.error != null) {
+              updateState(state.value.copyWith(error: "Historian Error: ${data.error}"));
+            } else {
+              updateState(state.value.copyWith(registers: data.registers.toList(), clearError: true));
             }
           });
         } catch (e) {
@@ -82,7 +80,7 @@ class DeviceInspectorScreen extends HookConsumerWidget {
 
       return () {
         isMounted = false;
-        pollingTimer?.cancel();
+        historianSub?.cancel();
         clientRef.value?.disconnect();
       };
     }, [ipAddress]);
