@@ -1,0 +1,22 @@
+PODS:
+  - FlutterMacOS (1.0.0)
+  - rust_lib_modbus_studio (0.0.1):
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - rust_lib_modbus_studio (from `Flutter/ephemeral/.symlinks/plugins/rust_lib_modbus_studio/macos`)
+
+EXTERNAL SOURCES:
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+  rust_lib_modbus_studio:
+    :path: Flutter/ephemeral/.symlinks/plugins/rust_lib_modbus_studio/macos
+
+SPEC CHECKSUMS:
+  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
+  rust_lib_modbus_studio: 999fbedde955301e7fc8fa53b72c772087bfd2ff
+
+PODFILE CHECKSUM: 54d867c82ac51cbd61b565781b9fada492027009
+
+COCOAPODS: 1.16.2
