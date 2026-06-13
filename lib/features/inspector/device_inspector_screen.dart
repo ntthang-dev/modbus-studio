@@ -92,64 +92,7 @@ class DeviceInspectorScreen extends HookConsumerWidget {
         child: Column(
           children: [
             // Status Header
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1C1C1E).withValues(alpha:0.7),
-                      border: Border.all(color: const Color(0xFF2C2C2E).withValues(alpha:0.5)),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: state.value.isConnecting 
-                                ? CupertinoColors.systemYellow.withValues(alpha:0.2)
-                                : state.value.isConnected 
-                                    ? CupertinoColors.systemGreen.withValues(alpha:0.2)
-                                    : CupertinoColors.systemRed.withValues(alpha:0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            state.value.isConnecting 
-                                ? CupertinoIcons.arrow_2_circlepath 
-                                : state.value.isConnected 
-                                    ? CupertinoIcons.check_mark_circled_solid 
-                                    : CupertinoIcons.exclamationmark_triangle,
-                            color: state.value.isConnecting 
-                                ? CupertinoColors.systemYellow 
-                                : state.value.isConnected 
-                                    ? CupertinoColors.systemGreen 
-                                    : CupertinoColors.systemRed,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Connection Status', style: TextStyle(color: CupertinoColors.systemGrey, fontSize: 13)),
-                              const SizedBox(height: 4),
-                              Text(
-                                state.value.isConnecting ? 'Connecting...' : state.value.isConnected ? 'Connected & Polling' : 'Disconnected',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            ConnectionStatusHeader(state: state.value),
 
             if (state.value.error != null)
               Padding(
@@ -175,31 +118,7 @@ class DeviceInspectorScreen extends HookConsumerWidget {
                       ),
                       itemCount: state.value.registers.length,
                       itemBuilder: (context, index) {
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1C1C1E).withValues(alpha:0.5),
-                            border: Border.all(color: CupertinoColors.systemTeal.withValues(alpha:0.2)),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('Register 4000${index + 1}', style: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 12)),
-                              const SizedBox(height: 8),
-                              Text(
-                                '${state.value.registers[index]}',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Courier',
-                                  color: CupertinoColors.systemTeal,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ).animate().fadeIn(duration: 200.ms).scale(begin: const Offset(0.95, 0.95));
+                        return RegisterGridTile(index: index, value: state.value.registers[index]);
                       },
                     ),
             ),
@@ -207,5 +126,109 @@ class DeviceInspectorScreen extends HookConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+class ConnectionStatusHeader extends StatelessWidget {
+  final InspectorState state;
+
+  const ConnectionStatusHeader({super.key, required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1C1C1E).withValues(alpha:0.7),
+              border: Border.all(color: const Color(0xFF2C2C2E).withValues(alpha:0.5)),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: state.isConnecting 
+                        ? CupertinoColors.systemYellow.withValues(alpha:0.2)
+                        : state.isConnected 
+                            ? CupertinoColors.systemGreen.withValues(alpha:0.2)
+                            : CupertinoColors.systemRed.withValues(alpha:0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    state.isConnecting 
+                        ? CupertinoIcons.arrow_2_circlepath 
+                        : state.isConnected 
+                            ? CupertinoIcons.check_mark_circled_solid 
+                            : CupertinoIcons.exclamationmark_triangle,
+                    color: state.isConnecting 
+                        ? CupertinoColors.systemYellow 
+                        : state.isConnected 
+                            ? CupertinoColors.systemGreen 
+                            : CupertinoColors.systemRed,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Connection Status', style: TextStyle(color: CupertinoColors.systemGrey, fontSize: 13)),
+                      const SizedBox(height: 4),
+                      Text(
+                        state.isConnecting ? 'Connecting...' : state.isConnected ? 'Connected & Polling' : 'Disconnected',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class RegisterGridTile extends StatelessWidget {
+  final int index;
+  final int value;
+
+  const RegisterGridTile({super.key, required this.index, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1C1C1E).withValues(alpha:0.5),
+        border: Border.all(color: CupertinoColors.systemTeal.withValues(alpha:0.2)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Register 4000${index + 1}', style: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 12)),
+          const SizedBox(height: 8),
+          Text(
+            '$value',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Courier',
+              color: CupertinoColors.systemTeal,
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 200.ms).scale(begin: const Offset(0.95, 0.95));
   }
 }
