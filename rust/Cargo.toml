@@ -12,7 +12,10 @@ flutter_rust_bridge = "=2.12.0"
 rand = "0.10.1"
 rusqlite = { version = "0.40.1", features = ["bundled"] }
 tokio = { version = "1.52.3", features = ["full"] }
-tokio-modbus = "0.17.0"
+tokio-modbus = { version = "0.17.0", features = ["rtu", "tcp-server"] }
+
+[target.'cfg(not(any(target_os = "ios", target_os = "android")))'.dependencies]
+tokio-serial = "5.4.4"
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
