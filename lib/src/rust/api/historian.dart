@@ -6,7 +6,19 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`
+
+Future<List<HistorianPoint>> getHistoricalData({
+  required String dbPath,
+  required String ip,
+  required int address,
+  required int limit,
+}) => RustLib.instance.api.crateApiHistorianGetHistoricalData(
+  dbPath: dbPath,
+  ip: ip,
+  address: address,
+  limit: limit,
+);
 
 Stream<HistorianData> startHistorianLoop({
   required String ip,
@@ -34,4 +46,28 @@ class HistorianData {
           runtimeType == other.runtimeType &&
           registers == other.registers &&
           error == other.error;
+}
+
+class HistorianPoint {
+  final PlatformInt64 timestampMs;
+  final int address;
+  final int value;
+
+  const HistorianPoint({
+    required this.timestampMs,
+    required this.address,
+    required this.value,
+  });
+
+  @override
+  int get hashCode => timestampMs.hashCode ^ address.hashCode ^ value.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is HistorianPoint &&
+          runtimeType == other.runtimeType &&
+          timestampMs == other.timestampMs &&
+          address == other.address &&
+          value == other.value;
 }

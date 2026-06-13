@@ -10,6 +10,48 @@ pub struct HistorianData {
     pub error: Option<String>,
 }
 
+#[derive(Clone)]
+pub struct HistorianPoint {
+    pub timestamp_ms: i64,
+    pub address: u16,
+    pub value: u16,
+}
+
+pub fn get_historical_data(
+    db_path: String,
+    ip: String,
+    address: u16,
+    limit: u32,
+) -> anyhow::Result<Vec<HistorianPoint>> {
+    let conn = rusqlite::Connection::open(db_path)?;
+    
+    // Convert SQLite CURRENT_TIMESTAMP to Unix epoch milliseconds
+    let mut stmt = conn.prepare(
+        "SELECT CAST(strftime('%s', timestamp) AS INTEGER) * 1000, value 
+         FROM poll_logs 
+         WHERE ip_address = ?1 AND address = ?2 
+         ORDER BY id DESC LIMIT ?3"
+    )?;
+    
+    let rows = stmt.query_map(rusqlite::params![ip, address, limit], |row| {
+        Ok(HistorianPoint {
+            timestamp_ms: row.get(0)?,
+            address,
+            value: row.get(1)?,
+        })
+    })?;
+
+    let mut data = Vec::new();
+    for row in rows {
+        data.push(row?);
+    }
+    
+    // Reverse so the chart draws from oldest to newest (left to right)
+    data.reverse();
+    
+    Ok(data)
+}
+
 pub fn start_historian_loop(
     ip: String,
     port: u16,
