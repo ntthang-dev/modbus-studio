@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:modbus_studio/src/rust/api/client.dart';
 import 'package:modbus_studio/src/rust/api/historian.dart';
 import 'package:modbus_studio/features/inspector/widgets/write_control_card.dart';
+import 'package:modbus_studio/features/inspector/widgets/historian_chart.dart';
 
 class InspectorState {
   final bool isConnecting;
@@ -119,6 +120,9 @@ class DeviceInspectorScreen extends HookConsumerWidget {
               onWriteCoil: state.value.isConnected ? handleWriteCoil : null,
               onWriteRegister: state.value.isConnected ? handleWriteRegister : null,
             ),
+
+            if (state.value.isConnected)
+              HistorianChart(ipAddress: ipAddress, address: 40001),
 
             // Registers Grid
             Expanded(
