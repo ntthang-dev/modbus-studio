@@ -22,4 +22,8 @@ abstract class ModbusClient implements RustOpaqueInterface {
     required int address,
     required int quantity,
   });
+
+  Future<void> writeSingleCoil({required int address, required bool value});
+
+  Future<void> writeSingleRegister({required int address, required int value});
 }

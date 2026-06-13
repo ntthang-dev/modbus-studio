@@ -65,7 +65,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => 290944618;
+  int get rustContentHash => -1044003650;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -90,6 +90,18 @@ abstract class RustLibApi extends BaseApi {
     required ModbusClient that,
     required int address,
     required int quantity,
+  });
+
+  Future<void> crateApiClientModbusClientWriteSingleCoil({
+    required ModbusClient that,
+    required int address,
+    required bool value,
+  });
+
+  Future<void> crateApiClientModbusClientWriteSingleRegister({
+    required ModbusClient that,
+    required int address,
+    required int value,
   });
 
   Stream<RadarDevice> crateApiScannerStartRadarScan({required String subnet});
@@ -224,6 +236,86 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiClientModbusClientWriteSingleCoil({
+    required ModbusClient that,
+    required int address,
+    required bool value,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
+            that,
+            serializer,
+          );
+          sse_encode_u_16(address, serializer);
+          sse_encode_bool(value, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 4,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiClientModbusClientWriteSingleCoilConstMeta,
+        argValues: [that, address, value],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiClientModbusClientWriteSingleCoilConstMeta =>
+      const TaskConstMeta(
+        debugName: "ModbusClient_write_single_coil",
+        argNames: ["that", "address", "value"],
+      );
+
+  @override
+  Future<void> crateApiClientModbusClientWriteSingleRegister({
+    required ModbusClient that,
+    required int address,
+    required int value,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
+            that,
+            serializer,
+          );
+          sse_encode_u_16(address, serializer);
+          sse_encode_u_16(value, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 5,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiClientModbusClientWriteSingleRegisterConstMeta,
+        argValues: [that, address, value],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiClientModbusClientWriteSingleRegisterConstMeta =>
+      const TaskConstMeta(
+        debugName: "ModbusClient_write_single_register",
+        argNames: ["that", "address", "value"],
+      );
+
+  @override
   Stream<RadarDevice> crateApiScannerStartRadarScan({required String subnet}) {
     final sink = RustStreamSink<RadarDevice>();
     unawaited(
@@ -236,7 +328,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 4,
+              funcId: 6,
               port: port_,
             );
           },
@@ -312,6 +404,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   String dco_decode_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as String;
+  }
+
+  @protected
+  bool dco_decode_bool(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as bool;
   }
 
   @protected
@@ -422,6 +520,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  bool sse_decode_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint8() != 0;
+  }
+
+  @protected
   Uint16List sse_decode_list_prim_u_16_strict(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
@@ -475,12 +579,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   int sse_decode_i_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getInt32();
-  }
-
-  @protected
-  bool sse_decode_bool(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getUint8() != 0;
   }
 
   @protected
@@ -555,6 +653,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_bool(bool self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint8(self ? 1 : 0);
+  }
+
+  @protected
   void sse_encode_list_prim_u_16_strict(
     Uint16List self,
     SseSerializer serializer,
@@ -610,12 +714,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
   }
-
-  @protected
-  void sse_encode_bool(bool self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putUint8(self ? 1 : 0);
-  }
 }
 
 @sealed
@@ -647,5 +745,21 @@ class ModbusClientImpl extends RustOpaque implements ModbusClient {
     that: this,
     address: address,
     quantity: quantity,
+  );
+
+  Future<void> writeSingleCoil({required int address, required bool value}) =>
+      RustLib.instance.api.crateApiClientModbusClientWriteSingleCoil(
+        that: this,
+        address: address,
+        value: value,
+      );
+
+  Future<void> writeSingleRegister({
+    required int address,
+    required int value,
+  }) => RustLib.instance.api.crateApiClientModbusClientWriteSingleRegister(
+    that: this,
+    address: address,
+    value: value,
   );
 }

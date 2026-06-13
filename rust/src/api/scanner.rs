@@ -3,6 +3,7 @@ use std::time::Duration;
 use tokio::net::TcpStream;
 use tokio::time::timeout;
 
+#[derive(Clone)]
 pub struct RadarDevice {
     pub ip: String,
     pub latency_ms: u16,

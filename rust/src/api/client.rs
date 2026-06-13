@@ -35,6 +35,30 @@ impl ModbusClient {
         Ok(data)
     }
 
+    pub async fn write_single_coil(&self, address: u16, value: bool) -> anyhow::Result<()> {
+        let mut ctx = self.context.lock().await;
+        
+        let write_future = ctx.write_single_coil(address, value);
+        let response = tokio::time::timeout(Duration::from_secs(2), write_future)
+            .await
+            .map_err(|_| anyhow::anyhow!("Write timeout"))??;
+            
+        response.map_err(|e| anyhow::anyhow!("Modbus Exception: {:?}", e))?;
+        Ok(())
+    }
+
+    pub async fn write_single_register(&self, address: u16, value: u16) -> anyhow::Result<()> {
+        let mut ctx = self.context.lock().await;
+        
+        let write_future = ctx.write_single_register(address, value);
+        let response = tokio::time::timeout(Duration::from_secs(2), write_future)
+            .await
+            .map_err(|_| anyhow::anyhow!("Write timeout"))??;
+            
+        response.map_err(|e| anyhow::anyhow!("Modbus Exception: {:?}", e))?;
+        Ok(())
+    }
+
     pub async fn disconnect(&self) -> anyhow::Result<()> {
         let mut ctx = self.context.lock().await;
         ctx.disconnect().await?;
