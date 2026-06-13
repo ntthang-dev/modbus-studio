@@ -19,6 +19,12 @@ impl DbClient {
 
     fn init_db(&self) -> anyhow::Result<()> {
         let conn = self.conn.lock().unwrap();
+        // Enable Write-Ahead Logging for concurrent read/write (prevents database is locked errors)
+        conn.execute_batch(
+            "PRAGMA journal_mode = WAL;
+             PRAGMA synchronous = NORMAL;",
+        )?;
+
         conn.execute(
             "CREATE TABLE IF NOT EXISTS poll_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -49,8 +49,12 @@ class HistorianChart extends HookWidget {
     }
 
     // Determine min/max X for the chart domain
-    final minX = dataPoints.value.first.timestampMs.toDouble();
-    final maxX = dataPoints.value.last.timestampMs.toDouble();
+    double minX = dataPoints.value.first.timestampMs.toDouble();
+    double maxX = dataPoints.value.last.timestampMs.toDouble();
+    if (minX == maxX) {
+      minX -= 1000;
+      maxX += 1000;
+    }
 
     return Container(
       height: 220,
