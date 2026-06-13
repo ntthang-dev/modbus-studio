@@ -4,6 +4,8 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api/client.dart';
+import 'api/db.dart';
+import 'api/historian.dart';
 import 'api/scanner.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -65,7 +67,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => -1044003650;
+  int get rustContentHash => -928556674;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -77,6 +79,15 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
+  Future<void> crateApiDbDbClientLogData({
+    required DbClient that,
+    required String ipAddress,
+    required int address,
+    required int value,
+  });
+
+  Future<DbClient> crateApiDbDbClientNew({required String dbPath});
+
   Future<ModbusClient> crateApiClientModbusClientConnect({
     required String ip,
     required int port,
@@ -104,7 +115,21 @@ abstract class RustLibApi extends BaseApi {
     required int value,
   });
 
+  Stream<HistorianData> crateApiHistorianStartHistorianLoop({
+    required String ip,
+    required int port,
+    required String dbPath,
+  });
+
   Stream<RadarDevice> crateApiScannerStartRadarScan({required String subnet});
+
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_DbClient;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_DbClient;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_DbClientPtr;
 
   RustArcIncrementStrongCountFnType
   get rust_arc_increment_strong_count_ModbusClient;
@@ -124,6 +149,76 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
+  Future<void> crateApiDbDbClientLogData({
+    required DbClient that,
+    required String ipAddress,
+    required int address,
+    required int value,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          sse_encode_String(ipAddress, serializer);
+          sse_encode_u_16(address, serializer);
+          sse_encode_u_16(value, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 1,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientLogDataConstMeta,
+        argValues: [that, ipAddress, address, value],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientLogDataConstMeta => const TaskConstMeta(
+    debugName: "DbClient_log_data",
+    argNames: ["that", "ipAddress", "address", "value"],
+  );
+
+  @override
+  Future<DbClient> crateApiDbDbClientNew({required String dbPath}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 2,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientNewConstMeta,
+        argValues: [dbPath],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientNewConstMeta =>
+      const TaskConstMeta(debugName: "DbClient_new", argNames: ["dbPath"]);
+
+  @override
   Future<ModbusClient> crateApiClientModbusClientConnect({
     required String ip,
     required int port,
@@ -137,7 +232,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 1,
+            funcId: 3,
             port: port_,
           );
         },
@@ -174,7 +269,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 4,
             port: port_,
           );
         },
@@ -214,7 +309,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 5,
             port: port_,
           );
         },
@@ -254,7 +349,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 6,
             port: port_,
           );
         },
@@ -294,7 +389,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 7,
             port: port_,
           );
         },
@@ -316,6 +411,48 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Stream<HistorianData> crateApiHistorianStartHistorianLoop({
+    required String ip,
+    required int port,
+    required String dbPath,
+  }) {
+    final sink = RustStreamSink<HistorianData>();
+    unawaited(
+      handler.executeNormal(
+        NormalTask(
+          callFfi: (port_) {
+            final serializer = SseSerializer(generalizedFrbRustBinding);
+            sse_encode_String(ip, serializer);
+            sse_encode_u_16(port, serializer);
+            sse_encode_String(dbPath, serializer);
+            sse_encode_StreamSink_historian_data_Sse(sink, serializer);
+            pdeCallFfi(
+              generalizedFrbRustBinding,
+              serializer,
+              funcId: 8,
+              port: port_,
+            );
+          },
+          codec: SseCodec(
+            decodeSuccessData: sse_decode_unit,
+            decodeErrorData: sse_decode_AnyhowException,
+          ),
+          constMeta: kCrateApiHistorianStartHistorianLoopConstMeta,
+          argValues: [ip, port, dbPath, sink],
+          apiImpl: this,
+        ),
+      ),
+    );
+    return sink.stream;
+  }
+
+  TaskConstMeta get kCrateApiHistorianStartHistorianLoopConstMeta =>
+      const TaskConstMeta(
+        debugName: "start_historian_loop",
+        argNames: ["ip", "port", "dbPath", "sink"],
+      );
+
+  @override
   Stream<RadarDevice> crateApiScannerStartRadarScan({required String subnet}) {
     final sink = RustStreamSink<RadarDevice>();
     unawaited(
@@ -328,7 +465,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 6,
+              funcId: 9,
               port: port_,
             );
           },
@@ -352,6 +489,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_DbClient => wire
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_DbClient => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient;
+
+  RustArcIncrementStrongCountFnType
   get rust_arc_increment_strong_count_ModbusClient => wire
       .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient;
 
@@ -366,12 +511,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  DbClient
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return DbClientImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   ModbusClient
   dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
     dynamic raw,
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ModbusClientImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  DbClient
+  dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return DbClientImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
@@ -384,12 +547,29 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  DbClient
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return DbClientImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   ModbusClient
   dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
     dynamic raw,
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ModbusClientImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  RustStreamSink<HistorianData> dco_decode_StreamSink_historian_data_Sse(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    throw UnimplementedError();
   }
 
   @protected
@@ -413,6 +593,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  HistorianData dco_decode_historian_data(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return HistorianData(
+      registers: dco_decode_list_prim_u_16_strict(arr[0]),
+      error: dco_decode_opt_String(arr[1]),
+    );
+  }
+
+  @protected
   Uint16List dco_decode_list_prim_u_16_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint16List;
@@ -422,6 +614,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
+  }
+
+  @protected
+  String? dco_decode_opt_String(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_String(raw);
   }
 
   @protected
@@ -469,12 +667,36 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  DbClient
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return DbClientImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
   ModbusClient
   sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ModbusClientImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  DbClient
+  sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return DbClientImpl.frbInternalSseDecode(
       sse_decode_usize(deserializer),
       sse_decode_i_32(deserializer),
     );
@@ -493,6 +715,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  DbClient
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return DbClientImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
   ModbusClient
   sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
     SseDeserializer deserializer,
@@ -502,6 +736,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       sse_decode_usize(deserializer),
       sse_decode_i_32(deserializer),
     );
+  }
+
+  @protected
+  RustStreamSink<HistorianData> sse_decode_StreamSink_historian_data_Sse(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    throw UnimplementedError('Unreachable ()');
   }
 
   @protected
@@ -526,6 +768,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  HistorianData sse_decode_historian_data(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_registers = sse_decode_list_prim_u_16_strict(deserializer);
+    var var_error = sse_decode_opt_String(deserializer);
+    return HistorianData(registers: var_registers, error: var_error);
+  }
+
+  @protected
   Uint16List sse_decode_list_prim_u_16_strict(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
@@ -537,6 +787,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getUint8List(len_);
+  }
+
+  @protected
+  String? sse_decode_opt_String(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_String(deserializer));
+    } else {
+      return null;
+    }
   }
 
   @protected
@@ -592,6 +853,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    DbClient self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as DbClientImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
+  void
   sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
     ModbusClient self,
     SseSerializer serializer,
@@ -599,6 +873,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
       (self as ModbusClientImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    DbClient self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as DbClientImpl).frbInternalSseEncode(move: false),
       serializer,
     );
   }
@@ -618,6 +905,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    DbClient self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as DbClientImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
+  }
+
+  @protected
+  void
   sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
     ModbusClient self,
     SseSerializer serializer,
@@ -625,6 +925,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
       (self as ModbusClientImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
+  }
+
+  @protected
+  void sse_encode_StreamSink_historian_data_Sse(
+    RustStreamSink<HistorianData> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(
+      self.setupAndSerialize(
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_historian_data,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+      ),
       serializer,
     );
   }
@@ -659,6 +976,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_historian_data(HistorianData self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_list_prim_u_16_strict(self.registers, serializer);
+    sse_encode_opt_String(self.error, serializer);
+  }
+
+  @protected
   void sse_encode_list_prim_u_16_strict(
     Uint16List self,
     SseSerializer serializer,
@@ -676,6 +1000,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
+  }
+
+  @protected
+  void sse_encode_opt_String(String? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_String(self, serializer);
+    }
   }
 
   @protected
@@ -714,6 +1048,37 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
   }
+}
+
+@sealed
+class DbClientImpl extends RustOpaque implements DbClient {
+  // Not to be used by end users
+  DbClientImpl.frbInternalDcoDecode(List<dynamic> wire)
+    : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  DbClientImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        RustLib.instance.api.rust_arc_increment_strong_count_DbClient,
+    rustArcDecrementStrongCount:
+        RustLib.instance.api.rust_arc_decrement_strong_count_DbClient,
+    rustArcDecrementStrongCountPtr:
+        RustLib.instance.api.rust_arc_decrement_strong_count_DbClientPtr,
+  );
+
+  Future<void> logData({
+    required String ipAddress,
+    required int address,
+    required int value,
+  }) => RustLib.instance.api.crateApiDbDbClientLogData(
+    that: this,
+    ipAddress: ipAddress,
+    address: address,
+    value: value,
+  );
 }
 
 @sealed

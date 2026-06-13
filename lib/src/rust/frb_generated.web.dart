@@ -7,6 +7,8 @@
 // ignore_for_file: argument_type_not_assignable
 
 import 'api/client.dart';
+import 'api/db.dart';
+import 'api/historian.dart';
 import 'api/scanner.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -22,6 +24,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   });
 
   CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_DbClientPtr => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient;
+
+  CrossPlatformFinalizerArg
   get rust_arc_decrement_strong_count_ModbusClientPtr => wire
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient;
 
@@ -29,8 +35,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException dco_decode_AnyhowException(dynamic raw);
 
   @protected
+  DbClient
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    dynamic raw,
+  );
+
+  @protected
   ModbusClient
   dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
+    dynamic raw,
+  );
+
+  @protected
+  DbClient
+  dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     dynamic raw,
   );
 
@@ -41,8 +59,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DbClient
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    dynamic raw,
+  );
+
+  @protected
   ModbusClient
   dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
+    dynamic raw,
+  );
+
+  @protected
+  RustStreamSink<HistorianData> dco_decode_StreamSink_historian_data_Sse(
     dynamic raw,
   );
 
@@ -58,10 +87,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  HistorianData dco_decode_historian_data(dynamic raw);
+
+  @protected
   Uint16List dco_decode_list_prim_u_16_strict(dynamic raw);
 
   @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
+
+  @protected
+  String? dco_decode_opt_String(dynamic raw);
 
   @protected
   RadarDevice dco_decode_radar_device(dynamic raw);
@@ -82,8 +117,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
+  DbClient
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   ModbusClient
   sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  DbClient
+  sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     SseDeserializer deserializer,
   );
 
@@ -94,8 +141,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DbClient
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   ModbusClient
   sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  RustStreamSink<HistorianData> sse_decode_StreamSink_historian_data_Sse(
     SseDeserializer deserializer,
   );
 
@@ -111,10 +169,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  HistorianData sse_decode_historian_data(SseDeserializer deserializer);
+
+  @protected
   Uint16List sse_decode_list_prim_u_16_strict(SseDeserializer deserializer);
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
+
+  @protected
+  String? sse_decode_opt_String(SseDeserializer deserializer);
 
   @protected
   RadarDevice sse_decode_radar_device(SseDeserializer deserializer);
@@ -142,8 +206,22 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    DbClient self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
   sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
     ModbusClient self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    DbClient self,
     SseSerializer serializer,
   );
 
@@ -156,8 +234,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    DbClient self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
   sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
     ModbusClient self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_StreamSink_historian_data_Sse(
+    RustStreamSink<HistorianData> self,
     SseSerializer serializer,
   );
 
@@ -174,6 +265,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_historian_data(HistorianData self, SseSerializer serializer);
+
+  @protected
   void sse_encode_list_prim_u_16_strict(
     Uint16List self,
     SseSerializer serializer,
@@ -184,6 +278,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     Uint8List self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_opt_String(String? self, SseSerializer serializer);
 
   @protected
   void sse_encode_radar_device(RadarDevice self, SseSerializer serializer);
@@ -210,6 +307,22 @@ class RustLibWire implements BaseWire {
   RustLibWire.fromExternalLibrary(ExternalLibrary lib);
 
   void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    int ptr,
+  ) => wasmModule
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+        ptr,
+      );
+
+  void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    int ptr,
+  ) => wasmModule
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+        ptr,
+      );
+
+  void
   rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
     int ptr,
   ) => wasmModule
@@ -232,6 +345,16 @@ external RustLibWasmModule get wasmModule;
 @JS()
 @anonymous
 extension type RustLibWasmModule._(JSObject _) implements JSObject {
+  external void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    int ptr,
+  );
+
+  external void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+    int ptr,
+  );
+
   external void
   rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
     int ptr,
