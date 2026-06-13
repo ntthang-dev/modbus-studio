@@ -1,10 +1,16 @@
 import 'package:flutter/cupertino.dart';
-import 'package:modbus_studio/src/rust/api/scanner.dart';
+
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:modbus_studio/providers/radar_provider.dart';
 import 'package:modbus_studio/src/rust/frb_generated.dart';
 
 Future<void> main() async {
   await RustLib.init();
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -22,62 +28,32 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class RadarScreen extends StatefulWidget {
+class RadarScreen extends HookConsumerWidget {
   const RadarScreen({super.key});
 
   @override
-  State<RadarScreen> createState() => _RadarScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final radarState = ref.watch(radarProvider);
+    final radarNotifier = ref.read(radarProvider.notifier);
 
-class _RadarScreenState extends State<RadarScreen> {
-  final List<RadarDevice> _devices = [];
-  bool _isScanning = false;
-
-  void _startScan() {
-    setState(() {
-      _devices.clear();
-      _isScanning = true;
-    });
-
-    startMockRadarScan().listen(
-      (device) {
-        setState(() {
-          _devices.add(device);
-        });
-      },
-      onDone: () {
-        setState(() {
-          _isScanning = false;
-        });
-      },
-      onError: (e) {
-        setState(() {
-          _isScanning = false;
-        });
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Modbus Studio Radar'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: _isScanning ? null : _startScan,
-          child: _isScanning 
+          onPressed: radarState.isScanning ? radarNotifier.stopScan : radarNotifier.startScan,
+          child: radarState.isScanning 
               ? const CupertinoActivityIndicator() 
               : const Text('Scan'),
         ),
       ),
       child: SafeArea(
-        child: _devices.isEmpty && !_isScanning
+        child: radarState.devices.isEmpty && !radarState.isScanning
             ? const Center(child: Text('Tap Scan to start'))
             : ListView.builder(
-                itemCount: _devices.length,
+                itemCount: radarState.devices.length,
                 itemBuilder: (context, index) {
-                  final device = _devices[index];
+                  final device = radarState.devices[index];
                   return Container(
                     decoration: const BoxDecoration(
                       border: Border(
