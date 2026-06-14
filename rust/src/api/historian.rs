@@ -124,3 +124,40 @@ pub fn start_historian_loop(
 
     Ok(())
 }
+
+pub fn get_telemetry_logs_by_range(
+    db_path: String,
+    start_ts: i64,
+    end_ts: i64,
+) -> anyhow::Result<Vec<HistorianPoint>> {
+    let conn = rusqlite::Connection::open(db_path)?;
+    
+    let mut stmt = conn.prepare(
+        "SELECT ip_address, address, value, CAST(strftime('%s', timestamp) AS INTEGER) * 1000 
+         FROM poll_logs 
+         WHERE (CAST(strftime('%s', timestamp) AS INTEGER) * 1000) >= ?1 
+           AND (CAST(strftime('%s', timestamp) AS INTEGER) * 1000) <= ?2 
+         ORDER BY id DESC"
+    )?;
+    
+    let rows = stmt.query_map(rusqlite::params![start_ts, end_ts], |row| {
+        let _ip: String = row.get(0)?;
+        let address: u16 = row.get(1)?;
+        let value: u16 = row.get(2)?;
+        let timestamp_ms: i64 = row.get(3)?;
+        Ok(HistorianPoint {
+            timestamp_ms,
+            address,
+            value,
+        })
+    })?;
+
+    let mut data = Vec::new();
+    for row in rows {
+        data.push(row?);
+    }
+    
+    data.reverse();
+    
+    Ok(data)
+}

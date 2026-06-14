@@ -42,6 +42,16 @@ Future<void> dbLogAlarm({required String dbPath, required AlarmLog log}) =>
 Future<List<AlarmLog>> dbGetAlarmLogs({required String dbPath}) =>
     RustLib.instance.api.crateApiDbDbGetAlarmLogs(dbPath: dbPath);
 
+Future<List<AlarmLog>> dbGetAlarmLogsByRange({
+  required String dbPath,
+  required PlatformInt64 startTs,
+  required PlatformInt64 endTs,
+}) => RustLib.instance.api.crateApiDbDbGetAlarmLogsByRange(
+  dbPath: dbPath,
+  startTs: startTs,
+  endTs: endTs,
+);
+
 Future<void> dbClearAlarmLogs({required String dbPath}) =>
     RustLib.instance.api.crateApiDbDbClearAlarmLogs(dbPath: dbPath);
 
@@ -91,6 +101,11 @@ abstract class DbClient implements RustOpaqueInterface {
   Future<void> deleteScheduledWrite({required PlatformInt64 id});
 
   Future<List<AlarmLog>> getAlarmLogs();
+
+  Future<List<AlarmLog>> getAlarmLogsByRange({
+    required PlatformInt64 startTs,
+    required PlatformInt64 endTs,
+  });
 
   Future<List<ConnectionProfile>> getProfiles();
 

@@ -31,6 +31,16 @@ Stream<HistorianData> startHistorianLoop({
   dbPath: dbPath,
 );
 
+Future<List<HistorianPoint>> getTelemetryLogsByRange({
+  required String dbPath,
+  required PlatformInt64 startTs,
+  required PlatformInt64 endTs,
+}) => RustLib.instance.api.crateApiHistorianGetTelemetryLogsByRange(
+  dbPath: dbPath,
+  startTs: startTs,
+  endTs: endTs,
+);
+
 class HistorianData {
   final Uint16List registers;
   final String? error;

@@ -145,6 +145,10 @@ impl DbClient {
             [],
         )?;
 
+        // Create indexes on timestamp columns for range query performance
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_poll_logs_timestamp ON poll_logs (timestamp)", [])?;
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_alarm_logs_timestamp ON alarm_logs (timestamp)", [])?;
+
         Ok(())
     }
 
@@ -465,6 +469,42 @@ impl DbClient {
         Ok(logs)
     }
 
+    pub fn get_alarm_logs_by_range(&self, start_ts: i64, end_ts: i64) -> anyhow::Result<Vec<AlarmLog>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(
+            "SELECT id, rule_id, register_address, value, message, severity, timestamp 
+             FROM alarm_logs 
+             WHERE timestamp >= ?1 AND timestamp <= ?2 
+             ORDER BY timestamp DESC"
+        )?;
+
+        let rows = stmt.query_map([start_ts, end_ts], |row| {
+            let id: i64 = row.get(0)?;
+            let rule_id: Option<i64> = row.get(1)?;
+            let register_address: i32 = row.get(2)?;
+            let value: i32 = row.get(3)?;
+            let message: String = row.get(4)?;
+            let severity: String = row.get(5)?;
+            let timestamp: i64 = row.get(6)?;
+
+            Ok(AlarmLog {
+                id: Some(id),
+                rule_id,
+                register_address: register_address as u16,
+                value: value as u16,
+                message,
+                severity,
+                timestamp,
+            })
+        })?;
+
+        let mut logs = Vec::new();
+        for row in rows {
+            logs.push(row?);
+        }
+        Ok(logs)
+    }
+
     pub fn clear_alarm_logs(&self) -> anyhow::Result<()> {
         let conn = self.conn.lock().unwrap();
         conn.execute("DELETE FROM alarm_logs", [])?;
@@ -539,6 +579,11 @@ pub fn db_log_alarm(db_path: String, log: AlarmLog) -> anyhow::Result<()> {
 pub fn db_get_alarm_logs(db_path: String) -> anyhow::Result<Vec<AlarmLog>> {
     let client = DbClient::new(&db_path)?;
     client.get_alarm_logs()
+}
+
+pub fn db_get_alarm_logs_by_range(db_path: String, start_ts: i64, end_ts: i64) -> anyhow::Result<Vec<AlarmLog>> {
+    let client = DbClient::new(&db_path)?;
+    client.get_alarm_logs_by_range(start_ts, end_ts)
 }
 
 pub fn db_clear_alarm_logs(db_path: String) -> anyhow::Result<()> {
@@ -803,6 +848,98 @@ mod tests {
         // Verify empty
         let final_list = client.get_scheduled_writes().unwrap();
         assert_eq!(final_list.len(), 0);
+
+        // Cleanup
+        let _ = fs::remove_file(db_path);
+    }
+
+    #[test]
+    fn test_alarm_and_telemetry_range_queries() {
+        let db_path = "test_modbus_range_queries.db";
+        let _ = fs::remove_file(db_path);
+
+        let client = DbClient::new(db_path).expect("Failed to create db client");
+
+        // Insert alarm logs with specific timestamps
+        let alarm1 = AlarmLog {
+            id: None,
+            rule_id: Some(1),
+            register_address: 40001,
+            value: 100,
+            message: "Test alarm 1".to_string(),
+            severity: "Critical".to_string(),
+            timestamp: 1000,
+        };
+        let alarm2 = AlarmLog {
+            id: None,
+            rule_id: Some(1),
+            register_address: 40001,
+            value: 105,
+            message: "Test alarm 2".to_string(),
+            severity: "Warning".to_string(),
+            timestamp: 2000,
+        };
+        let alarm3 = AlarmLog {
+            id: None,
+            rule_id: Some(2),
+            register_address: 40002,
+            value: 50,
+            message: "Test alarm 3".to_string(),
+            severity: "Warning".to_string(),
+            timestamp: 3000,
+        };
+
+        client.log_alarm(alarm1).unwrap();
+        client.log_alarm(alarm2).unwrap();
+        client.log_alarm(alarm3).unwrap();
+
+        // Query alarm logs range
+        let logs_all = client.get_alarm_logs_by_range(0, 4000).unwrap();
+        assert_eq!(logs_all.len(), 3);
+
+        let logs_partial = client.get_alarm_logs_by_range(1500, 3500).unwrap();
+        assert_eq!(logs_partial.len(), 2);
+        assert_eq!(logs_partial[0].timestamp, 3000);
+        assert_eq!(logs_partial[1].timestamp, 2000);
+
+        // Insert telemetry logs into poll_logs with offset timestamps relative to now
+        {
+            let conn = rusqlite::Connection::open(db_path).unwrap();
+            conn.execute(
+                "INSERT INTO poll_logs (ip_address, address, value, timestamp) 
+                 VALUES ('127.0.0.1', 40001, 10, datetime('now', '-20 seconds'))", 
+                []
+            ).unwrap();
+            conn.execute(
+                "INSERT INTO poll_logs (ip_address, address, value, timestamp) 
+                 VALUES ('127.0.0.1', 40001, 20, datetime('now', '-10 seconds'))", 
+                []
+            ).unwrap();
+            conn.execute(
+                "INSERT INTO poll_logs (ip_address, address, value, timestamp) 
+                 VALUES ('127.0.0.1', 40001, 30, datetime('now', '-2 seconds'))", 
+                []
+            ).unwrap();
+        }
+
+        let now_sec = std::time::SystemTime::now()
+            .duration_since(std::time::SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as i64;
+
+        use crate::api::historian::get_telemetry_logs_by_range;
+        // Query last 30 seconds
+        let t_all = get_telemetry_logs_by_range(db_path.to_string(), (now_sec - 35) * 1000, (now_sec + 5) * 1000).unwrap();
+        assert_eq!(t_all.len(), 3);
+        assert_eq!(t_all[0].value, 10);
+        assert_eq!(t_all[1].value, 20);
+        assert_eq!(t_all[2].value, 30);
+
+        // Query last 15 seconds (should miss the -20 seconds record)
+        let t_recent = get_telemetry_logs_by_range(db_path.to_string(), (now_sec - 15) * 1000, (now_sec + 5) * 1000).unwrap();
+        assert_eq!(t_recent.len(), 2);
+        assert_eq!(t_recent[0].value, 20);
+        assert_eq!(t_recent[1].value, 30);
 
         // Cleanup
         let _ = fs::remove_file(db_path);
