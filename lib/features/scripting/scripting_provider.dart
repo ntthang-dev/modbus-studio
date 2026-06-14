@@ -81,6 +81,17 @@ class ScriptingNotifier extends Notifier<ScriptingState> {
           final data = json.decode(args.toString()) as Map<String, dynamic>;
           final addr = data['address'] as int;
           final val = data['value'] as int;
+          
+          // Secure validation constraints
+          if (addr < 1 || addr > 65535) {
+            _log("JS Security Alert: writeRegister blocked. Address $addr is out of bounds.");
+            return;
+          }
+          if (val < 0 || val > 65535) {
+            _log("JS Security Alert: writeRegister blocked. Value $val is out of 16-bit bounds.");
+            return;
+          }
+          
           ref.read(connectionProvider.notifier).writeRegister(addr, val);
           _log("JS Autowrite: Reg $addr -> $val");
         } catch (e) {
@@ -92,10 +103,17 @@ class ScriptingNotifier extends Notifier<ScriptingState> {
       runtime.onMessage('logAlarm', (dynamic args) {
         try {
           final data = json.decode(args.toString()) as Map<String, dynamic>;
-          final msg = data['message'].toString();
-          final sev = data['severity'].toString();
-          ref.read(alarmProvider.notifier).logCustomAlarm(msg, sev);
-          _log("JS Custom Alarm: [$sev] $msg");
+          String msg = data['message'].toString();
+          final String rawSev = data['severity'].toString().toLowerCase();
+          
+          // Secure validation constraints
+          if (msg.length > 200) {
+            msg = msg.substring(0, 200); // Prevent memory exhaustion
+          }
+          final String severity = (rawSev == 'critical') ? 'Critical' : 'Warning';
+          
+          ref.read(alarmProvider.notifier).logCustomAlarm(msg, severity);
+          _log("JS Custom Alarm: [$severity] $msg");
         } catch (e) {
           _log("JS Error logAlarm callback: $e");
         }
@@ -105,8 +123,18 @@ class ScriptingNotifier extends Notifier<ScriptingState> {
       runtime.onMessage('exportReport', (dynamic args) async {
         try {
           final data = json.decode(args.toString()) as Map<String, dynamic>;
-          final format = (data['format'] ?? 'pdf').toString().toLowerCase();
-          final rangeHours = (data['rangeHours'] ?? 24) as int;
+          final String format = (data['format'] ?? 'pdf').toString().toLowerCase();
+          final int rangeHours = (data['rangeHours'] ?? 24) as int;
+          
+          // Secure validation constraints (Prevent Path Traversal and Database DoS)
+          if (format != 'pdf' && format != 'csv') {
+            _log("JS Security Alert: exportReport blocked. Invalid format '$format'. Only 'pdf' and 'csv' are allowed.");
+            return;
+          }
+          if (rangeHours < 1 || rangeHours > 720) {
+            _log("JS Security Alert: exportReport blocked. rangeHours '$rangeHours' is out of bounds (1 to 720 hours).");
+            return;
+          }
           
           await exportReportHeadless(format: format, rangeHours: rangeHours);
         } catch (e) {

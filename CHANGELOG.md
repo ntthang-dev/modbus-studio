@@ -48,3 +48,8 @@ This is the initial production-ready release of Modbus Studio, an industrial-gra
 - Fixed compilation and syntax errors inside [ConnectionHubScreen](file:///Users/ristresso/Developers/modbus_scan/modbus_scada_app/lib/features/hub/connection_hub_screen.dart) relating to missing greeting helpers.
 - Resolved native QuickJS `.dylib` loading crashes inside headless unit-test runners.
 - Repaired database locks by applying WAL mode configurations to SQLite instances.
+
+### Security
+- **Sandbox Security Hardening**:
+  - Implemented boundary validation constraints on exposed Javascript sandbox bridge callbacks (`writeRegister`, `logAlarm`, `exportReport`).
+  - Added strict parameter checks preventing path traversal attacks via report format injection, out-of-bounds register writes, and CPU/IO resource exhaustion from excessive range query hours.
