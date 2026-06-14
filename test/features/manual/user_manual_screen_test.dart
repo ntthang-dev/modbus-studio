@@ -58,9 +58,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check screen contents changed
-      expect(find.text('Modbus Protocol Basics'), findsOneWidget);
+      expect(find.text('Modbus Protocol Overview'), findsOneWidget);
+      expect(find.textContaining('Modbus RTU (Serial)'), findsOneWidget);
+      expect(find.textContaining('Modbus TCP (Ethernet)'), findsOneWidget);
+      expect(find.textContaining('CRC Error Detection'), findsOneWidget);
+      expect(find.textContaining('MBAP Header'), findsOneWidget);
       expect(find.textContaining('Coils (FC01)'), findsOneWidget);
-      expect(find.textContaining('Holding Registers (FC03)'), findsOneWidget);
     });
 
     testWidgets('navigates to Scripting Engine and renders code block', (tester) async {

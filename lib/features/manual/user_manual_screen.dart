@@ -279,16 +279,72 @@ class UserManualScreen extends HookConsumerWidget {
   }
 
   Widget _buildModbusBasics(Color textColor, Color subtitleColor, bool isField) {
+    final Color sectionTitleColor = isField ? CupertinoColors.black : CupertinoColors.systemTeal;
+    final Color compareHeaderColor = isField ? CupertinoColors.systemGrey5 : const Color(0xFF23232C);
+    final Color compareRowColor = isField ? CupertinoColors.white : const Color(0xFF16161C);
+    final Color borderColor = isField ? CupertinoColors.systemGrey4 : const Color(0xFF2C2C35);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Modbus Protocol Basics', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor)),
+        Text('Modbus Protocol Overview', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: textColor)),
         const SizedBox(height: 12),
         Text(
-          'Modbus is a standard request/reply industrial protocol utilizing master/slave architectures. Data is categorized into four primary memory blocks:',
+          'Modbus is an open-source industrial communication protocol originally developed by Modicon (now Schneider Electric) in 1979. It remains the most widely used protocol for connecting industrial electronic devices such as PLCs, RTUs, sensors, and actuators.',
           style: TextStyle(fontSize: 14, color: textColor, height: 1.4),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
+        
+        Text('Core Concepts', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: sectionTitleColor)),
+        const SizedBox(height: 8),
+        _buildBulletPoint('Query-Response Model', 'Only the master (client) can initiate queries. Slaves (servers) listen for requests and respond with data or acknowledgment.', textColor),
+        _buildBulletPoint('PDU & ADU', 'The Protocol Data Unit (PDU) contains the Function Code and Data. The Application Data Unit (ADU) wraps the PDU with transport-specific headers/checksums.', textColor),
+        
+        const SizedBox(height: 24),
+        Text('Modbus RTU (Serial)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: sectionTitleColor)),
+        const SizedBox(height: 8),
+        Text(
+          'Modbus RTU transmits data as compact binary bytes over serial communication lines (most commonly RS-485 or RS-232). It is simple, highly robust over long distances in noisy factory environments, and requires low overhead.',
+          style: TextStyle(fontSize: 13, color: subtitleColor, height: 1.4),
+        ),
+        const SizedBox(height: 10),
+        _buildBulletPoint('CRC Error Detection', 'Every RTU packet ends with a 16-bit Cyclic Redundancy Check (CRC) checksum. If the receiver calculates a different CRC, the corrupted frame is discarded.', textColor),
+        _buildBulletPoint('Timing Constraints', 'RTU frames are separated by a silent interval of at least 3.5 character times. Precise timing is required to prevent frame fragmentation.', textColor),
+
+        const SizedBox(height: 24),
+        Text('Modbus TCP (Ethernet)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: sectionTitleColor)),
+        const SizedBox(height: 8),
+        Text(
+          'Modbus TCP encapsulates standard Modbus query frames inside TCP/IP packets. It runs over standard Ethernet networks, typically utilizing TCP port 502.',
+          style: TextStyle(fontSize: 13, color: subtitleColor, height: 1.4),
+        ),
+        const SizedBox(height: 10),
+        _buildBulletPoint('MBAP Header', 'A 7-byte Modbus Application Protocol (MBAP) header is prepended to the frame, containing Transaction ID, Protocol ID, Length, and Unit ID.', textColor),
+        _buildBulletPoint('Unit ID (Bridge)', 'The Slave ID field becomes the Unit ID. While mostly unused on direct Ethernet devices, it is critical for routing messages through TCP-to-RTU gateways.', textColor),
+
+        const SizedBox(height: 24),
+        Text('Protocol Comparison', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: sectionTitleColor)),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: borderColor),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            children: [
+              _buildCompareHeader(compareHeaderColor, textColor, borderColor),
+              _buildCompareRow('Medium', 'Serial (RS-485, RS-232)', 'Ethernet / Wi-Fi', compareRowColor, textColor, borderColor),
+              _buildCompareRow('Speed', '9600 - 115200 bps', '10/100/1000 Mbps', compareRowColor, textColor, borderColor),
+              _buildCompareRow('Error Check', '16-bit CRC', 'TCP/IP Checksum', compareRowColor, textColor, borderColor),
+              _buildCompareRow('Topology', 'Daisy-chain / bus', 'Star / network switch', compareRowColor, textColor, borderColor),
+              _buildCompareRow('Max Nodes', '247 devices', 'Virtually unlimited', compareRowColor, textColor, borderColor),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 24),
+        Text('Core Memory Blocks', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: sectionTitleColor)),
+        const SizedBox(height: 12),
         _buildBasicsCard('Coils (FC01)', 'Read / Write', 'Single-bit binary states (discrete outputs). Used for relays, solenoid valves, and power switches.', textColor, isField),
         _buildBasicsCard('Discrete Inputs (FC02)', 'Read-Only', 'Single-bit binary states (discrete inputs). Used for limit switches, proximity sensors, and status signals.', textColor, isField),
         _buildBasicsCard('Holding Registers (FC03)', 'Read / Write', '16-bit analog registers. Used for configuration parameters, setpoints, and analog control outputs.', textColor, isField),
@@ -529,6 +585,60 @@ logAlarm("Critical", "High temperature threshold exceeded!");
           ),
         )
       ],
+    );
+  }
+
+  Widget _buildBulletPoint(String label, String value, Color textColor) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0, left: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(color: CupertinoColors.systemTeal, fontSize: 14)),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                style: TextStyle(color: textColor, fontSize: 13, height: 1.4),
+                children: [
+                  TextSpan(text: '$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(text: value),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompareHeader(Color bgColor, Color textColor, Color borderColor) {
+    return Container(
+      color: bgColor,
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      child: Row(
+        children: [
+          Expanded(child: Text('Feature', style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 13))),
+          Expanded(child: Text('Modbus RTU', style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 13))),
+          Expanded(child: Text('Modbus TCP', style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 13))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompareRow(String feature, String rtu, String tcp, Color bgColor, Color textColor, Color borderColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      decoration: BoxDecoration(
+        color: bgColor,
+        border: Border(top: BorderSide(color: borderColor, width: 0.5)),
+      ),
+      child: Row(
+        children: [
+          Expanded(child: Text(feature, style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.w500))),
+          Expanded(child: Text(rtu, style: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 12))),
+          Expanded(child: Text(tcp, style: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 12))),
+        ],
+      ),
     );
   }
 }
