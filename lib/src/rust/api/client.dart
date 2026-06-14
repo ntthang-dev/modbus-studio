@@ -4,16 +4,17 @@
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
 import '../frb_generated.dart';
+import 'db.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ModbusClient>>
 abstract class ModbusClient implements RustOpaqueInterface {
   static Future<ModbusClient> connect({
-    required String ip,
-    required int port,
+    required ConnectionConfig config,
+    required int slaveId,
   }) => RustLib.instance.api.crateApiClientModbusClientConnect(
-    ip: ip,
-    port: port,
+    config: config,
+    slaveId: slaveId,
   );
 
   Future<void> disconnect();

@@ -7,6 +7,7 @@ import 'api/client.dart';
 import 'api/db.dart';
 import 'api/historian.dart';
 import 'api/scanner.dart';
+import 'api/server.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -67,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => 1744731663;
+  int get rustContentHash => 65022063;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -79,6 +80,42 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
+  Future<void> crateApiDbDbClientClearAlarmLogs({required DbClient that});
+
+  Future<void> crateApiDbDbClientDeleteProfile({
+    required DbClient that,
+    required PlatformInt64 id,
+  });
+
+  Future<void> crateApiDbDbClientDeleteRule({
+    required DbClient that,
+    required PlatformInt64 id,
+  });
+
+  Future<void> crateApiDbDbClientDeleteScheduledWrite({
+    required DbClient that,
+    required PlatformInt64 id,
+  });
+
+  Future<List<AlarmLog>> crateApiDbDbClientGetAlarmLogs({
+    required DbClient that,
+  });
+
+  Future<List<ConnectionProfile>> crateApiDbDbClientGetProfiles({
+    required DbClient that,
+  });
+
+  Future<List<AlarmRule>> crateApiDbDbClientGetRules({required DbClient that});
+
+  Future<List<ScheduledWrite>> crateApiDbDbClientGetScheduledWrites({
+    required DbClient that,
+  });
+
+  Future<void> crateApiDbDbClientLogAlarm({
+    required DbClient that,
+    required AlarmLog log,
+  });
+
   Future<void> crateApiDbDbClientLogData({
     required DbClient that,
     required String ipAddress,
@@ -88,9 +125,34 @@ abstract class RustLibApi extends BaseApi {
 
   Future<DbClient> crateApiDbDbClientNew({required String dbPath});
 
+  Future<void> crateApiDbDbClientPruneAlarmLogs({
+    required DbClient that,
+    required PlatformInt64 maxRows,
+  });
+
+  Future<void> crateApiDbDbClientPrunePollLogs({
+    required DbClient that,
+    required PlatformInt64 maxRows,
+  });
+
+  Future<void> crateApiDbDbClientSaveProfile({
+    required DbClient that,
+    required ConnectionProfile profile,
+  });
+
+  Future<void> crateApiDbDbClientSaveRule({
+    required DbClient that,
+    required AlarmRule rule,
+  });
+
+  Future<void> crateApiDbDbClientSaveScheduledWrite({
+    required DbClient that,
+    required ScheduledWrite write,
+  });
+
   Future<ModbusClient> crateApiClientModbusClientConnect({
-    required String ip,
-    required int port,
+    required ConnectionConfig config,
+    required int slaveId,
   });
 
   Future<void> crateApiClientModbusClientDisconnect({
@@ -115,6 +177,84 @@ abstract class RustLibApi extends BaseApi {
     required int value,
   });
 
+  Future<int> crateApiServerModbusSimulatorReadRegister({
+    required ModbusSimulator that,
+    required int addr,
+  });
+
+  Future<ModbusSimulator> crateApiServerModbusSimulatorStart({
+    required int port,
+  });
+
+  Future<void> crateApiServerModbusSimulatorStop({
+    required ModbusSimulator that,
+  });
+
+  Future<void> crateApiServerModbusSimulatorWriteRegister({
+    required ModbusSimulator that,
+    required int addr,
+    required int val,
+  });
+
+  Future<void> crateApiDbDbClearAlarmLogs({required String dbPath});
+
+  Future<void> crateApiDbDbDeleteProfile({
+    required String dbPath,
+    required PlatformInt64 id,
+  });
+
+  Future<void> crateApiDbDbDeleteRule({
+    required String dbPath,
+    required PlatformInt64 id,
+  });
+
+  Future<void> crateApiDbDbDeleteScheduledWrite({
+    required String dbPath,
+    required PlatformInt64 id,
+  });
+
+  Future<List<AlarmLog>> crateApiDbDbGetAlarmLogs({required String dbPath});
+
+  Future<List<ConnectionProfile>> crateApiDbDbGetProfiles({
+    required String dbPath,
+  });
+
+  Future<List<AlarmRule>> crateApiDbDbGetRules({required String dbPath});
+
+  Future<List<ScheduledWrite>> crateApiDbDbGetScheduledWrites({
+    required String dbPath,
+  });
+
+  Future<void> crateApiDbDbLogAlarm({
+    required String dbPath,
+    required AlarmLog log,
+  });
+
+  Future<void> crateApiDbDbPruneAlarmLogs({
+    required String dbPath,
+    required PlatformInt64 maxRows,
+  });
+
+  Future<void> crateApiDbDbPrunePollLogs({
+    required String dbPath,
+    required PlatformInt64 maxRows,
+  });
+
+  Future<void> crateApiDbDbSaveProfile({
+    required String dbPath,
+    required ConnectionProfile profile,
+  });
+
+  Future<void> crateApiDbDbSaveRule({
+    required String dbPath,
+    required AlarmRule rule,
+  });
+
+  Future<void> crateApiDbDbSaveScheduledWrite({
+    required String dbPath,
+    required ScheduledWrite write,
+  });
+
   Future<List<HistorianPoint>> crateApiHistorianGetHistoricalData({
     required String dbPath,
     required String ip,
@@ -123,8 +263,8 @@ abstract class RustLibApi extends BaseApi {
   });
 
   Stream<HistorianData> crateApiHistorianStartHistorianLoop({
-    required String ip,
-    required int port,
+    required ConnectionConfig config,
+    required int slaveId,
     required String dbPath,
   });
 
@@ -145,6 +285,15 @@ abstract class RustLibApi extends BaseApi {
   get rust_arc_decrement_strong_count_ModbusClient;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_ModbusClientPtr;
+
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_ModbusSimulator;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_ModbusSimulator;
+
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_ModbusSimulatorPtr;
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -154,6 +303,330 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required super.generalizedFrbRustBinding,
     required super.portManager,
   });
+
+  @override
+  Future<void> crateApiDbDbClientClearAlarmLogs({required DbClient that}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 1,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientClearAlarmLogsConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientClearAlarmLogsConstMeta =>
+      const TaskConstMeta(
+        debugName: "DbClient_clear_alarm_logs",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<void> crateApiDbDbClientDeleteProfile({
+    required DbClient that,
+    required PlatformInt64 id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          sse_encode_i_64(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 2,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientDeleteProfileConstMeta,
+        argValues: [that, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientDeleteProfileConstMeta =>
+      const TaskConstMeta(
+        debugName: "DbClient_delete_profile",
+        argNames: ["that", "id"],
+      );
+
+  @override
+  Future<void> crateApiDbDbClientDeleteRule({
+    required DbClient that,
+    required PlatformInt64 id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          sse_encode_i_64(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 3,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientDeleteRuleConstMeta,
+        argValues: [that, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientDeleteRuleConstMeta =>
+      const TaskConstMeta(
+        debugName: "DbClient_delete_rule",
+        argNames: ["that", "id"],
+      );
+
+  @override
+  Future<void> crateApiDbDbClientDeleteScheduledWrite({
+    required DbClient that,
+    required PlatformInt64 id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          sse_encode_i_64(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 4,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientDeleteScheduledWriteConstMeta,
+        argValues: [that, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientDeleteScheduledWriteConstMeta =>
+      const TaskConstMeta(
+        debugName: "DbClient_delete_scheduled_write",
+        argNames: ["that", "id"],
+      );
+
+  @override
+  Future<List<AlarmLog>> crateApiDbDbClientGetAlarmLogs({
+    required DbClient that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 5,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_alarm_log,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientGetAlarmLogsConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientGetAlarmLogsConstMeta =>
+      const TaskConstMeta(
+        debugName: "DbClient_get_alarm_logs",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<List<ConnectionProfile>> crateApiDbDbClientGetProfiles({
+    required DbClient that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 6,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_connection_profile,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientGetProfilesConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientGetProfilesConstMeta =>
+      const TaskConstMeta(
+        debugName: "DbClient_get_profiles",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<List<AlarmRule>> crateApiDbDbClientGetRules({required DbClient that}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 7,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_alarm_rule,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientGetRulesConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientGetRulesConstMeta =>
+      const TaskConstMeta(debugName: "DbClient_get_rules", argNames: ["that"]);
+
+  @override
+  Future<List<ScheduledWrite>> crateApiDbDbClientGetScheduledWrites({
+    required DbClient that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 8,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_scheduled_write,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientGetScheduledWritesConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientGetScheduledWritesConstMeta =>
+      const TaskConstMeta(
+        debugName: "DbClient_get_scheduled_writes",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<void> crateApiDbDbClientLogAlarm({
+    required DbClient that,
+    required AlarmLog log,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          sse_encode_box_autoadd_alarm_log(log, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 9,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientLogAlarmConstMeta,
+        argValues: [that, log],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientLogAlarmConstMeta => const TaskConstMeta(
+    debugName: "DbClient_log_alarm",
+    argNames: ["that", "log"],
+  );
 
   @override
   Future<void> crateApiDbDbClientLogData({
@@ -176,7 +649,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 1,
+            funcId: 10,
             port: port_,
           );
         },
@@ -206,7 +679,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 11,
             port: port_,
           );
         },
@@ -226,20 +699,209 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "DbClient_new", argNames: ["dbPath"]);
 
   @override
-  Future<ModbusClient> crateApiClientModbusClientConnect({
-    required String ip,
-    required int port,
+  Future<void> crateApiDbDbClientPruneAlarmLogs({
+    required DbClient that,
+    required PlatformInt64 maxRows,
   }) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(ip, serializer);
-          sse_encode_u_16(port, serializer);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          sse_encode_i_64(maxRows, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 12,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientPruneAlarmLogsConstMeta,
+        argValues: [that, maxRows],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientPruneAlarmLogsConstMeta =>
+      const TaskConstMeta(
+        debugName: "DbClient_prune_alarm_logs",
+        argNames: ["that", "maxRows"],
+      );
+
+  @override
+  Future<void> crateApiDbDbClientPrunePollLogs({
+    required DbClient that,
+    required PlatformInt64 maxRows,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          sse_encode_i_64(maxRows, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 13,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientPrunePollLogsConstMeta,
+        argValues: [that, maxRows],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientPrunePollLogsConstMeta =>
+      const TaskConstMeta(
+        debugName: "DbClient_prune_poll_logs",
+        argNames: ["that", "maxRows"],
+      );
+
+  @override
+  Future<void> crateApiDbDbClientSaveProfile({
+    required DbClient that,
+    required ConnectionProfile profile,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          sse_encode_box_autoadd_connection_profile(profile, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 14,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientSaveProfileConstMeta,
+        argValues: [that, profile],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientSaveProfileConstMeta =>
+      const TaskConstMeta(
+        debugName: "DbClient_save_profile",
+        argNames: ["that", "profile"],
+      );
+
+  @override
+  Future<void> crateApiDbDbClientSaveRule({
+    required DbClient that,
+    required AlarmRule rule,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          sse_encode_box_autoadd_alarm_rule(rule, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 15,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientSaveRuleConstMeta,
+        argValues: [that, rule],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientSaveRuleConstMeta => const TaskConstMeta(
+    debugName: "DbClient_save_rule",
+    argNames: ["that", "rule"],
+  );
+
+  @override
+  Future<void> crateApiDbDbClientSaveScheduledWrite({
+    required DbClient that,
+    required ScheduledWrite write,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
+            that,
+            serializer,
+          );
+          sse_encode_box_autoadd_scheduled_write(write, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 16,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClientSaveScheduledWriteConstMeta,
+        argValues: [that, write],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClientSaveScheduledWriteConstMeta =>
+      const TaskConstMeta(
+        debugName: "DbClient_save_scheduled_write",
+        argNames: ["that", "write"],
+      );
+
+  @override
+  Future<ModbusClient> crateApiClientModbusClientConnect({
+    required ConnectionConfig config,
+    required int slaveId,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_connection_config(config, serializer);
+          sse_encode_u_8(slaveId, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 17,
             port: port_,
           );
         },
@@ -249,7 +911,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta: kCrateApiClientModbusClientConnectConstMeta,
-        argValues: [ip, port],
+        argValues: [config, slaveId],
         apiImpl: this,
       ),
     );
@@ -258,7 +920,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiClientModbusClientConnectConstMeta =>
       const TaskConstMeta(
         debugName: "ModbusClient_connect",
-        argNames: ["ip", "port"],
+        argNames: ["config", "slaveId"],
       );
 
   @override
@@ -276,7 +938,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 18,
             port: port_,
           );
         },
@@ -316,7 +978,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 19,
             port: port_,
           );
         },
@@ -356,7 +1018,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 20,
             port: port_,
           );
         },
@@ -396,7 +1058,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 21,
             port: port_,
           );
         },
@@ -418,6 +1080,611 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<int> crateApiServerModbusSimulatorReadRegister({
+    required ModbusSimulator that,
+    required int addr,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+            that,
+            serializer,
+          );
+          sse_encode_u_16(addr, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 22,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_u_16,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiServerModbusSimulatorReadRegisterConstMeta,
+        argValues: [that, addr],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiServerModbusSimulatorReadRegisterConstMeta =>
+      const TaskConstMeta(
+        debugName: "ModbusSimulator_read_register",
+        argNames: ["that", "addr"],
+      );
+
+  @override
+  Future<ModbusSimulator> crateApiServerModbusSimulatorStart({
+    required int port,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_u_16(port, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 23,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiServerModbusSimulatorStartConstMeta,
+        argValues: [port],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiServerModbusSimulatorStartConstMeta =>
+      const TaskConstMeta(
+        debugName: "ModbusSimulator_start",
+        argNames: ["port"],
+      );
+
+  @override
+  Future<void> crateApiServerModbusSimulatorStop({
+    required ModbusSimulator that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 24,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiServerModbusSimulatorStopConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiServerModbusSimulatorStopConstMeta =>
+      const TaskConstMeta(
+        debugName: "ModbusSimulator_stop",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<void> crateApiServerModbusSimulatorWriteRegister({
+    required ModbusSimulator that,
+    required int addr,
+    required int val,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+            that,
+            serializer,
+          );
+          sse_encode_u_16(addr, serializer);
+          sse_encode_u_16(val, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 25,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiServerModbusSimulatorWriteRegisterConstMeta,
+        argValues: [that, addr, val],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiServerModbusSimulatorWriteRegisterConstMeta =>
+      const TaskConstMeta(
+        debugName: "ModbusSimulator_write_register",
+        argNames: ["that", "addr", "val"],
+      );
+
+  @override
+  Future<void> crateApiDbDbClearAlarmLogs({required String dbPath}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 26,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbClearAlarmLogsConstMeta,
+        argValues: [dbPath],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbClearAlarmLogsConstMeta => const TaskConstMeta(
+    debugName: "db_clear_alarm_logs",
+    argNames: ["dbPath"],
+  );
+
+  @override
+  Future<void> crateApiDbDbDeleteProfile({
+    required String dbPath,
+    required PlatformInt64 id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          sse_encode_i_64(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 27,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbDeleteProfileConstMeta,
+        argValues: [dbPath, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbDeleteProfileConstMeta => const TaskConstMeta(
+    debugName: "db_delete_profile",
+    argNames: ["dbPath", "id"],
+  );
+
+  @override
+  Future<void> crateApiDbDbDeleteRule({
+    required String dbPath,
+    required PlatformInt64 id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          sse_encode_i_64(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 28,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbDeleteRuleConstMeta,
+        argValues: [dbPath, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbDeleteRuleConstMeta => const TaskConstMeta(
+    debugName: "db_delete_rule",
+    argNames: ["dbPath", "id"],
+  );
+
+  @override
+  Future<void> crateApiDbDbDeleteScheduledWrite({
+    required String dbPath,
+    required PlatformInt64 id,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          sse_encode_i_64(id, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 29,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbDeleteScheduledWriteConstMeta,
+        argValues: [dbPath, id],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbDeleteScheduledWriteConstMeta =>
+      const TaskConstMeta(
+        debugName: "db_delete_scheduled_write",
+        argNames: ["dbPath", "id"],
+      );
+
+  @override
+  Future<List<AlarmLog>> crateApiDbDbGetAlarmLogs({required String dbPath}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 30,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_alarm_log,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbGetAlarmLogsConstMeta,
+        argValues: [dbPath],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbGetAlarmLogsConstMeta =>
+      const TaskConstMeta(debugName: "db_get_alarm_logs", argNames: ["dbPath"]);
+
+  @override
+  Future<List<ConnectionProfile>> crateApiDbDbGetProfiles({
+    required String dbPath,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 31,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_connection_profile,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbGetProfilesConstMeta,
+        argValues: [dbPath],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbGetProfilesConstMeta =>
+      const TaskConstMeta(debugName: "db_get_profiles", argNames: ["dbPath"]);
+
+  @override
+  Future<List<AlarmRule>> crateApiDbDbGetRules({required String dbPath}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 32,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_alarm_rule,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbGetRulesConstMeta,
+        argValues: [dbPath],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbGetRulesConstMeta =>
+      const TaskConstMeta(debugName: "db_get_rules", argNames: ["dbPath"]);
+
+  @override
+  Future<List<ScheduledWrite>> crateApiDbDbGetScheduledWrites({
+    required String dbPath,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 33,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_scheduled_write,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbGetScheduledWritesConstMeta,
+        argValues: [dbPath],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbGetScheduledWritesConstMeta =>
+      const TaskConstMeta(
+        debugName: "db_get_scheduled_writes",
+        argNames: ["dbPath"],
+      );
+
+  @override
+  Future<void> crateApiDbDbLogAlarm({
+    required String dbPath,
+    required AlarmLog log,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          sse_encode_box_autoadd_alarm_log(log, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 34,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbLogAlarmConstMeta,
+        argValues: [dbPath, log],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbLogAlarmConstMeta => const TaskConstMeta(
+    debugName: "db_log_alarm",
+    argNames: ["dbPath", "log"],
+  );
+
+  @override
+  Future<void> crateApiDbDbPruneAlarmLogs({
+    required String dbPath,
+    required PlatformInt64 maxRows,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          sse_encode_i_64(maxRows, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 35,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbPruneAlarmLogsConstMeta,
+        argValues: [dbPath, maxRows],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbPruneAlarmLogsConstMeta => const TaskConstMeta(
+    debugName: "db_prune_alarm_logs",
+    argNames: ["dbPath", "maxRows"],
+  );
+
+  @override
+  Future<void> crateApiDbDbPrunePollLogs({
+    required String dbPath,
+    required PlatformInt64 maxRows,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          sse_encode_i_64(maxRows, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 36,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbPrunePollLogsConstMeta,
+        argValues: [dbPath, maxRows],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbPrunePollLogsConstMeta => const TaskConstMeta(
+    debugName: "db_prune_poll_logs",
+    argNames: ["dbPath", "maxRows"],
+  );
+
+  @override
+  Future<void> crateApiDbDbSaveProfile({
+    required String dbPath,
+    required ConnectionProfile profile,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          sse_encode_box_autoadd_connection_profile(profile, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 37,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbSaveProfileConstMeta,
+        argValues: [dbPath, profile],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbSaveProfileConstMeta => const TaskConstMeta(
+    debugName: "db_save_profile",
+    argNames: ["dbPath", "profile"],
+  );
+
+  @override
+  Future<void> crateApiDbDbSaveRule({
+    required String dbPath,
+    required AlarmRule rule,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          sse_encode_box_autoadd_alarm_rule(rule, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 38,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbSaveRuleConstMeta,
+        argValues: [dbPath, rule],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbSaveRuleConstMeta => const TaskConstMeta(
+    debugName: "db_save_rule",
+    argNames: ["dbPath", "rule"],
+  );
+
+  @override
+  Future<void> crateApiDbDbSaveScheduledWrite({
+    required String dbPath,
+    required ScheduledWrite write,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(dbPath, serializer);
+          sse_encode_box_autoadd_scheduled_write(write, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 39,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiDbDbSaveScheduledWriteConstMeta,
+        argValues: [dbPath, write],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiDbDbSaveScheduledWriteConstMeta =>
+      const TaskConstMeta(
+        debugName: "db_save_scheduled_write",
+        argNames: ["dbPath", "write"],
+      );
+
+  @override
   Future<List<HistorianPoint>> crateApiHistorianGetHistoricalData({
     required String dbPath,
     required String ip,
@@ -435,7 +1702,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 40,
             port: port_,
           );
         },
@@ -458,8 +1725,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Stream<HistorianData> crateApiHistorianStartHistorianLoop({
-    required String ip,
-    required int port,
+    required ConnectionConfig config,
+    required int slaveId,
     required String dbPath,
   }) {
     final sink = RustStreamSink<HistorianData>();
@@ -468,14 +1735,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         NormalTask(
           callFfi: (port_) {
             final serializer = SseSerializer(generalizedFrbRustBinding);
-            sse_encode_String(ip, serializer);
-            sse_encode_u_16(port, serializer);
+            sse_encode_box_autoadd_connection_config(config, serializer);
+            sse_encode_u_8(slaveId, serializer);
             sse_encode_String(dbPath, serializer);
             sse_encode_StreamSink_historian_data_Sse(sink, serializer);
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 9,
+              funcId: 41,
               port: port_,
             );
           },
@@ -484,7 +1751,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             decodeErrorData: sse_decode_AnyhowException,
           ),
           constMeta: kCrateApiHistorianStartHistorianLoopConstMeta,
-          argValues: [ip, port, dbPath, sink],
+          argValues: [config, slaveId, dbPath, sink],
           apiImpl: this,
         ),
       ),
@@ -495,7 +1762,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiHistorianStartHistorianLoopConstMeta =>
       const TaskConstMeta(
         debugName: "start_historian_loop",
-        argNames: ["ip", "port", "dbPath", "sink"],
+        argNames: ["config", "slaveId", "dbPath", "sink"],
       );
 
   @override
@@ -511,7 +1778,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 10,
+              funcId: 42,
               port: port_,
             );
           },
@@ -550,6 +1817,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   get rust_arc_decrement_strong_count_ModbusClient => wire
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient;
 
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_ModbusSimulator => wire
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_ModbusSimulator => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator;
+
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -575,6 +1850,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ModbusSimulator
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ModbusSimulatorImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  ModbusSimulator
+  dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ModbusSimulatorImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   DbClient
   dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     dynamic raw,
@@ -593,6 +1886,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ModbusSimulator
+  dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ModbusSimulatorImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   DbClient
   dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     dynamic raw,
@@ -608,6 +1910,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return ModbusClientImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  ModbusSimulator
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ModbusSimulatorImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
@@ -633,9 +1944,130 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  AlarmLog dco_decode_alarm_log(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 7)
+      throw Exception('unexpected arr length: expect 7 but see ${arr.length}');
+    return AlarmLog(
+      id: dco_decode_opt_box_autoadd_i_64(arr[0]),
+      ruleId: dco_decode_opt_box_autoadd_i_64(arr[1]),
+      registerAddress: dco_decode_u_16(arr[2]),
+      value: dco_decode_u_16(arr[3]),
+      message: dco_decode_String(arr[4]),
+      severity: dco_decode_String(arr[5]),
+      timestamp: dco_decode_i_64(arr[6]),
+    );
+  }
+
+  @protected
+  AlarmRule dco_decode_alarm_rule(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 7)
+      throw Exception('unexpected arr length: expect 7 but see ${arr.length}');
+    return AlarmRule(
+      id: dco_decode_opt_box_autoadd_i_64(arr[0]),
+      name: dco_decode_String(arr[1]),
+      registerAddress: dco_decode_u_16(arr[2]),
+      condition: dco_decode_String(arr[3]),
+      threshold: dco_decode_u_16(arr[4]),
+      severity: dco_decode_String(arr[5]),
+      isEnabled: dco_decode_bool(arr[6]),
+    );
+  }
+
+  @protected
   bool dco_decode_bool(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as bool;
+  }
+
+  @protected
+  AlarmLog dco_decode_box_autoadd_alarm_log(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_alarm_log(raw);
+  }
+
+  @protected
+  AlarmRule dco_decode_box_autoadd_alarm_rule(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_alarm_rule(raw);
+  }
+
+  @protected
+  ConnectionConfig dco_decode_box_autoadd_connection_config(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_connection_config(raw);
+  }
+
+  @protected
+  ConnectionProfile dco_decode_box_autoadd_connection_profile(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_connection_profile(raw);
+  }
+
+  @protected
+  PlatformInt64 dco_decode_box_autoadd_i_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_i_64(raw);
+  }
+
+  @protected
+  ScheduledWrite dco_decode_box_autoadd_scheduled_write(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_scheduled_write(raw);
+  }
+
+  @protected
+  int dco_decode_box_autoadd_u_16(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
+
+  @protected
+  int dco_decode_box_autoadd_u_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
+
+  @protected
+  int dco_decode_box_autoadd_u_8(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
+
+  @protected
+  ConnectionConfig dco_decode_connection_config(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 8)
+      throw Exception('unexpected arr length: expect 8 but see ${arr.length}');
+    return ConnectionConfig(
+      protocolType: dco_decode_String(arr[0]),
+      ip: dco_decode_opt_String(arr[1]),
+      port: dco_decode_opt_box_autoadd_u_16(arr[2]),
+      portName: dco_decode_opt_String(arr[3]),
+      baudRate: dco_decode_opt_box_autoadd_u_32(arr[4]),
+      parity: dco_decode_opt_String(arr[5]),
+      dataBits: dco_decode_opt_box_autoadd_u_8(arr[6]),
+      stopBits: dco_decode_opt_box_autoadd_u_8(arr[7]),
+    );
+  }
+
+  @protected
+  ConnectionProfile dco_decode_connection_profile(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 5)
+      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
+    return ConnectionProfile(
+      id: dco_decode_opt_box_autoadd_i_64(arr[0]),
+      name: dco_decode_String(arr[1]),
+      config: dco_decode_connection_config(arr[2]),
+      isFavorite: dco_decode_bool(arr[3]),
+      lastUsed: dco_decode_i_64(arr[4]),
+    );
   }
 
   @protected
@@ -670,6 +2102,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<AlarmLog> dco_decode_list_alarm_log(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_alarm_log).toList();
+  }
+
+  @protected
+  List<AlarmRule> dco_decode_list_alarm_rule(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_alarm_rule).toList();
+  }
+
+  @protected
+  List<ConnectionProfile> dco_decode_list_connection_profile(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_connection_profile).toList();
+  }
+
+  @protected
   List<HistorianPoint> dco_decode_list_historian_point(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_historian_point).toList();
@@ -688,9 +2138,39 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<ScheduledWrite> dco_decode_list_scheduled_write(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_scheduled_write).toList();
+  }
+
+  @protected
   String? dco_decode_opt_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_String(raw);
+  }
+
+  @protected
+  PlatformInt64? dco_decode_opt_box_autoadd_i_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_i_64(raw);
+  }
+
+  @protected
+  int? dco_decode_opt_box_autoadd_u_16(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_u_16(raw);
+  }
+
+  @protected
+  int? dco_decode_opt_box_autoadd_u_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_u_32(raw);
+  }
+
+  @protected
+  int? dco_decode_opt_box_autoadd_u_8(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_u_8(raw);
   }
 
   @protected
@@ -703,6 +2183,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       ip: dco_decode_String(arr[0]),
       latencyMs: dco_decode_u_16(arr[1]),
       status: dco_decode_String(arr[2]),
+    );
+  }
+
+  @protected
+  ScheduledWrite dco_decode_scheduled_write(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 6)
+      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
+    return ScheduledWrite(
+      id: dco_decode_opt_box_autoadd_i_64(arr[0]),
+      address: dco_decode_u_16(arr[1]),
+      value: dco_decode_u_16(arr[2]),
+      intervalSecs: dco_decode_u_32(arr[3]),
+      isCoil: dco_decode_bool(arr[4]),
+      isEnabled: dco_decode_bool(arr[5]),
     );
   }
 
@@ -768,6 +2264,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ModbusSimulator
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return ModbusSimulatorImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  ModbusSimulator
+  sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return ModbusSimulatorImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
   DbClient
   sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     SseDeserializer deserializer,
@@ -786,6 +2306,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return ModbusClientImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  ModbusSimulator
+  sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return ModbusSimulatorImpl.frbInternalSseDecode(
       sse_decode_usize(deserializer),
       sse_decode_i_32(deserializer),
     );
@@ -816,6 +2348,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ModbusSimulator
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return ModbusSimulatorImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
   RustStreamSink<HistorianData> sse_decode_StreamSink_historian_data_Sse(
     SseDeserializer deserializer,
   ) {
@@ -839,9 +2383,153 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  AlarmLog sse_decode_alarm_log(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_opt_box_autoadd_i_64(deserializer);
+    var var_ruleId = sse_decode_opt_box_autoadd_i_64(deserializer);
+    var var_registerAddress = sse_decode_u_16(deserializer);
+    var var_value = sse_decode_u_16(deserializer);
+    var var_message = sse_decode_String(deserializer);
+    var var_severity = sse_decode_String(deserializer);
+    var var_timestamp = sse_decode_i_64(deserializer);
+    return AlarmLog(
+      id: var_id,
+      ruleId: var_ruleId,
+      registerAddress: var_registerAddress,
+      value: var_value,
+      message: var_message,
+      severity: var_severity,
+      timestamp: var_timestamp,
+    );
+  }
+
+  @protected
+  AlarmRule sse_decode_alarm_rule(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_opt_box_autoadd_i_64(deserializer);
+    var var_name = sse_decode_String(deserializer);
+    var var_registerAddress = sse_decode_u_16(deserializer);
+    var var_condition = sse_decode_String(deserializer);
+    var var_threshold = sse_decode_u_16(deserializer);
+    var var_severity = sse_decode_String(deserializer);
+    var var_isEnabled = sse_decode_bool(deserializer);
+    return AlarmRule(
+      id: var_id,
+      name: var_name,
+      registerAddress: var_registerAddress,
+      condition: var_condition,
+      threshold: var_threshold,
+      severity: var_severity,
+      isEnabled: var_isEnabled,
+    );
+  }
+
+  @protected
   bool sse_decode_bool(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint8() != 0;
+  }
+
+  @protected
+  AlarmLog sse_decode_box_autoadd_alarm_log(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_alarm_log(deserializer));
+  }
+
+  @protected
+  AlarmRule sse_decode_box_autoadd_alarm_rule(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_alarm_rule(deserializer));
+  }
+
+  @protected
+  ConnectionConfig sse_decode_box_autoadd_connection_config(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_connection_config(deserializer));
+  }
+
+  @protected
+  ConnectionProfile sse_decode_box_autoadd_connection_profile(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_connection_profile(deserializer));
+  }
+
+  @protected
+  PlatformInt64 sse_decode_box_autoadd_i_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_i_64(deserializer));
+  }
+
+  @protected
+  ScheduledWrite sse_decode_box_autoadd_scheduled_write(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_scheduled_write(deserializer));
+  }
+
+  @protected
+  int sse_decode_box_autoadd_u_16(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_u_16(deserializer));
+  }
+
+  @protected
+  int sse_decode_box_autoadd_u_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_u_32(deserializer));
+  }
+
+  @protected
+  int sse_decode_box_autoadd_u_8(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_u_8(deserializer));
+  }
+
+  @protected
+  ConnectionConfig sse_decode_connection_config(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_protocolType = sse_decode_String(deserializer);
+    var var_ip = sse_decode_opt_String(deserializer);
+    var var_port = sse_decode_opt_box_autoadd_u_16(deserializer);
+    var var_portName = sse_decode_opt_String(deserializer);
+    var var_baudRate = sse_decode_opt_box_autoadd_u_32(deserializer);
+    var var_parity = sse_decode_opt_String(deserializer);
+    var var_dataBits = sse_decode_opt_box_autoadd_u_8(deserializer);
+    var var_stopBits = sse_decode_opt_box_autoadd_u_8(deserializer);
+    return ConnectionConfig(
+      protocolType: var_protocolType,
+      ip: var_ip,
+      port: var_port,
+      portName: var_portName,
+      baudRate: var_baudRate,
+      parity: var_parity,
+      dataBits: var_dataBits,
+      stopBits: var_stopBits,
+    );
+  }
+
+  @protected
+  ConnectionProfile sse_decode_connection_profile(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_opt_box_autoadd_i_64(deserializer);
+    var var_name = sse_decode_String(deserializer);
+    var var_config = sse_decode_connection_config(deserializer);
+    var var_isFavorite = sse_decode_bool(deserializer);
+    var var_lastUsed = sse_decode_i_64(deserializer);
+    return ConnectionProfile(
+      id: var_id,
+      name: var_name,
+      config: var_config,
+      isFavorite: var_isFavorite,
+      lastUsed: var_lastUsed,
+    );
   }
 
   @protected
@@ -869,6 +2557,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   PlatformInt64 sse_decode_i_64(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getPlatformInt64();
+  }
+
+  @protected
+  List<AlarmLog> sse_decode_list_alarm_log(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <AlarmLog>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_alarm_log(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<AlarmRule> sse_decode_list_alarm_rule(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <AlarmRule>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_alarm_rule(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<ConnectionProfile> sse_decode_list_connection_profile(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <ConnectionProfile>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_connection_profile(deserializer));
+    }
+    return ans_;
   }
 
   @protected
@@ -900,11 +2626,69 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<ScheduledWrite> sse_decode_list_scheduled_write(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <ScheduledWrite>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_scheduled_write(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   String? sse_decode_opt_String(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_String(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  PlatformInt64? sse_decode_opt_box_autoadd_i_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_i_64(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  int? sse_decode_opt_box_autoadd_u_16(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_u_16(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  int? sse_decode_opt_box_autoadd_u_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_u_32(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  int? sse_decode_opt_box_autoadd_u_8(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_u_8(deserializer));
     } else {
       return null;
     }
@@ -920,6 +2704,25 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       ip: var_ip,
       latencyMs: var_latencyMs,
       status: var_status,
+    );
+  }
+
+  @protected
+  ScheduledWrite sse_decode_scheduled_write(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_opt_box_autoadd_i_64(deserializer);
+    var var_address = sse_decode_u_16(deserializer);
+    var var_value = sse_decode_u_16(deserializer);
+    var var_intervalSecs = sse_decode_u_32(deserializer);
+    var var_isCoil = sse_decode_bool(deserializer);
+    var var_isEnabled = sse_decode_bool(deserializer);
+    return ScheduledWrite(
+      id: var_id,
+      address: var_address,
+      value: var_value,
+      intervalSecs: var_intervalSecs,
+      isCoil: var_isCoil,
+      isEnabled: var_isEnabled,
     );
   }
 
@@ -995,6 +2798,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    ModbusSimulator self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as ModbusSimulatorImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    ModbusSimulator self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as ModbusSimulatorImpl).frbInternalSseEncode(move: false),
+      serializer,
+    );
+  }
+
+  @protected
+  void
   sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     DbClient self,
     SseSerializer serializer,
@@ -1021,6 +2850,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    ModbusSimulator self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as ModbusSimulatorImpl).frbInternalSseEncode(move: false),
+      serializer,
+    );
+  }
+
+  @protected
+  void
   sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     DbClient self,
     SseSerializer serializer,
@@ -1041,6 +2883,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
       (self as ModbusClientImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    ModbusSimulator self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as ModbusSimulatorImpl).frbInternalSseEncode(move: null),
       serializer,
     );
   }
@@ -1086,9 +2941,134 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_alarm_log(AlarmLog self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_opt_box_autoadd_i_64(self.id, serializer);
+    sse_encode_opt_box_autoadd_i_64(self.ruleId, serializer);
+    sse_encode_u_16(self.registerAddress, serializer);
+    sse_encode_u_16(self.value, serializer);
+    sse_encode_String(self.message, serializer);
+    sse_encode_String(self.severity, serializer);
+    sse_encode_i_64(self.timestamp, serializer);
+  }
+
+  @protected
+  void sse_encode_alarm_rule(AlarmRule self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_opt_box_autoadd_i_64(self.id, serializer);
+    sse_encode_String(self.name, serializer);
+    sse_encode_u_16(self.registerAddress, serializer);
+    sse_encode_String(self.condition, serializer);
+    sse_encode_u_16(self.threshold, serializer);
+    sse_encode_String(self.severity, serializer);
+    sse_encode_bool(self.isEnabled, serializer);
+  }
+
+  @protected
   void sse_encode_bool(bool self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putUint8(self ? 1 : 0);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_alarm_log(
+    AlarmLog self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_alarm_log(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_alarm_rule(
+    AlarmRule self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_alarm_rule(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_connection_config(
+    ConnectionConfig self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_connection_config(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_connection_profile(
+    ConnectionProfile self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_connection_profile(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_i_64(
+    PlatformInt64 self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_64(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_scheduled_write(
+    ScheduledWrite self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_scheduled_write(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_u_16(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_16(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_u_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_32(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_u_8(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_8(self, serializer);
+  }
+
+  @protected
+  void sse_encode_connection_config(
+    ConnectionConfig self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.protocolType, serializer);
+    sse_encode_opt_String(self.ip, serializer);
+    sse_encode_opt_box_autoadd_u_16(self.port, serializer);
+    sse_encode_opt_String(self.portName, serializer);
+    sse_encode_opt_box_autoadd_u_32(self.baudRate, serializer);
+    sse_encode_opt_String(self.parity, serializer);
+    sse_encode_opt_box_autoadd_u_8(self.dataBits, serializer);
+    sse_encode_opt_box_autoadd_u_8(self.stopBits, serializer);
+  }
+
+  @protected
+  void sse_encode_connection_profile(
+    ConnectionProfile self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_opt_box_autoadd_i_64(self.id, serializer);
+    sse_encode_String(self.name, serializer);
+    sse_encode_connection_config(self.config, serializer);
+    sse_encode_bool(self.isFavorite, serializer);
+    sse_encode_i_64(self.lastUsed, serializer);
   }
 
   @protected
@@ -1113,6 +3093,42 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putPlatformInt64(self);
+  }
+
+  @protected
+  void sse_encode_list_alarm_log(
+    List<AlarmLog> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_alarm_log(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_alarm_rule(
+    List<AlarmRule> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_alarm_rule(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_connection_profile(
+    List<ConnectionProfile> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_connection_profile(item, serializer);
+    }
   }
 
   @protected
@@ -1148,6 +3164,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_list_scheduled_write(
+    List<ScheduledWrite> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_scheduled_write(item, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_opt_String(String? self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -1158,11 +3186,68 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_i_64(
+    PlatformInt64? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_i_64(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_u_16(int? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_u_16(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_u_32(int? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_u_32(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_u_8(int? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_u_8(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_radar_device(RadarDevice self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.ip, serializer);
     sse_encode_u_16(self.latencyMs, serializer);
     sse_encode_String(self.status, serializer);
+  }
+
+  @protected
+  void sse_encode_scheduled_write(
+    ScheduledWrite self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_opt_box_autoadd_i_64(self.id, serializer);
+    sse_encode_u_16(self.address, serializer);
+    sse_encode_u_16(self.value, serializer);
+    sse_encode_u_32(self.intervalSecs, serializer);
+    sse_encode_bool(self.isCoil, serializer);
+    sse_encode_bool(self.isEnabled, serializer);
   }
 
   @protected
@@ -1220,6 +3305,35 @@ class DbClientImpl extends RustOpaque implements DbClient {
         RustLib.instance.api.rust_arc_decrement_strong_count_DbClientPtr,
   );
 
+  Future<void> clearAlarmLogs() =>
+      RustLib.instance.api.crateApiDbDbClientClearAlarmLogs(that: this);
+
+  Future<void> deleteProfile({required PlatformInt64 id}) =>
+      RustLib.instance.api.crateApiDbDbClientDeleteProfile(that: this, id: id);
+
+  Future<void> deleteRule({required PlatformInt64 id}) =>
+      RustLib.instance.api.crateApiDbDbClientDeleteRule(that: this, id: id);
+
+  Future<void> deleteScheduledWrite({required PlatformInt64 id}) => RustLib
+      .instance
+      .api
+      .crateApiDbDbClientDeleteScheduledWrite(that: this, id: id);
+
+  Future<List<AlarmLog>> getAlarmLogs() =>
+      RustLib.instance.api.crateApiDbDbClientGetAlarmLogs(that: this);
+
+  Future<List<ConnectionProfile>> getProfiles() =>
+      RustLib.instance.api.crateApiDbDbClientGetProfiles(that: this);
+
+  Future<List<AlarmRule>> getRules() =>
+      RustLib.instance.api.crateApiDbDbClientGetRules(that: this);
+
+  Future<List<ScheduledWrite>> getScheduledWrites() =>
+      RustLib.instance.api.crateApiDbDbClientGetScheduledWrites(that: this);
+
+  Future<void> logAlarm({required AlarmLog log}) =>
+      RustLib.instance.api.crateApiDbDbClientLogAlarm(that: this, log: log);
+
   Future<void> logData({
     required String ipAddress,
     required int address,
@@ -1230,6 +3344,29 @@ class DbClientImpl extends RustOpaque implements DbClient {
     address: address,
     value: value,
   );
+
+  Future<void> pruneAlarmLogs({required PlatformInt64 maxRows}) => RustLib
+      .instance
+      .api
+      .crateApiDbDbClientPruneAlarmLogs(that: this, maxRows: maxRows);
+
+  Future<void> prunePollLogs({required PlatformInt64 maxRows}) => RustLib
+      .instance
+      .api
+      .crateApiDbDbClientPrunePollLogs(that: this, maxRows: maxRows);
+
+  Future<void> saveProfile({required ConnectionProfile profile}) => RustLib
+      .instance
+      .api
+      .crateApiDbDbClientSaveProfile(that: this, profile: profile);
+
+  Future<void> saveRule({required AlarmRule rule}) =>
+      RustLib.instance.api.crateApiDbDbClientSaveRule(that: this, rule: rule);
+
+  Future<void> saveScheduledWrite({required ScheduledWrite write}) => RustLib
+      .instance
+      .api
+      .crateApiDbDbClientSaveScheduledWrite(that: this, write: write);
 }
 
 @sealed
@@ -1278,4 +3415,37 @@ class ModbusClientImpl extends RustOpaque implements ModbusClient {
     address: address,
     value: value,
   );
+}
+
+@sealed
+class ModbusSimulatorImpl extends RustOpaque implements ModbusSimulator {
+  // Not to be used by end users
+  ModbusSimulatorImpl.frbInternalDcoDecode(List<dynamic> wire)
+    : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  ModbusSimulatorImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        RustLib.instance.api.rust_arc_increment_strong_count_ModbusSimulator,
+    rustArcDecrementStrongCount:
+        RustLib.instance.api.rust_arc_decrement_strong_count_ModbusSimulator,
+    rustArcDecrementStrongCountPtr:
+        RustLib.instance.api.rust_arc_decrement_strong_count_ModbusSimulatorPtr,
+  );
+
+  Future<int> readRegister({required int addr}) => RustLib.instance.api
+      .crateApiServerModbusSimulatorReadRegister(that: this, addr: addr);
+
+  Future<void> stop() =>
+      RustLib.instance.api.crateApiServerModbusSimulatorStop(that: this);
+
+  Future<void> writeRegister({required int addr, required int val}) =>
+      RustLib.instance.api.crateApiServerModbusSimulatorWriteRegister(
+        that: this,
+        addr: addr,
+        val: val,
+      );
 }

@@ -52,9 +52,11 @@ pub fn get_historical_data(
     Ok(data)
 }
 
+use crate::api::db::ConnectionConfig;
+
 pub fn start_historian_loop(
-    ip: String,
-    port: u16,
+    config: ConnectionConfig,
+    slave_id: u8,
     db_path: String,
     sink: StreamSink<HistorianData>
 ) -> anyhow::Result<()> {
@@ -68,8 +70,15 @@ pub fn start_historian_loop(
             }
         };
 
+        // Determine device key for SQL logging
+        let device_key = if config.protocol_type == "TCP" || config.protocol_type == "RTU_TCP" {
+            config.ip.clone().unwrap_or_default()
+        } else {
+            config.port_name.clone().unwrap_or_default()
+        };
+
         // 2. Connect to Modbus initially
-        let mut client_opt = ModbusClient::connect(ip.clone(), port).await.ok();
+        let mut client_opt = ModbusClient::connect(config.clone(), slave_id).await.ok();
         
         if client_opt.is_none() {
              let _ = sink.add(HistorianData { registers: vec![], error: Some("Connection failed. Retrying...".to_string()) });
@@ -82,17 +91,15 @@ pub fn start_historian_loop(
 
             // Try reconnecting if disconnected
             if client_opt.is_none() {
-                client_opt = ModbusClient::connect(ip.clone(), port).await.ok();
+                client_opt = ModbusClient::connect(config.clone(), slave_id).await.ok();
             }
 
             if let Some(client) = &client_opt {
                 match client.read_holding_registers(0, 10).await {
                     Ok(data) => {
                         // Log to DB
-                        // Note: Using loop for 10 items is fine since it's synchronous SQLite on a tokio thread.
-                        // Ideally we'd use a transaction or spawn_blocking if it were large, but 10 rows is ~0.1ms.
                         for (i, &val) in data.iter().enumerate() {
-                            let _ = db.log_data(&ip, 40000 + i as u16 + 1, val);
+                            let _ = db.log_data(&device_key, 40000 + i as u16 + 1, val);
                         }
                         
                         // Send to Flutter

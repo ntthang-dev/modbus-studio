@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:modbus_studio/src/rust/api/client.dart';
 import 'package:modbus_studio/src/rust/api/historian.dart';
+import 'package:modbus_studio/src/rust/api/db.dart';
 import 'package:modbus_studio/features/inspector/widgets/write_control_card.dart';
 import 'package:modbus_studio/features/inspector/widgets/historian_chart.dart';
 
@@ -58,13 +59,18 @@ class DeviceInspectorScreen extends HookConsumerWidget {
 
       Future<void> connect() async {
         try {
+          final config = ConnectionConfig(
+            protocolType: 'TCP',
+            ip: ipAddress,
+            port: 502,
+          );
           // 1. Connect a separate client for Write operations
-          final client = await ModbusClient.connect(ip: ipAddress, port: 502);
+          final client = await ModbusClient.connect(config: config, slaveId: 1);
           clientRef.value = client;
           updateState(state.value.copyWith(isConnecting: false, isConnected: true, clearError: true));
           
           // 2. Start the Active Rust Historian for polling and logging
-          final stream = startHistorianLoop(ip: ipAddress, port: 502, dbPath: "historian.db");
+          final stream = startHistorianLoop(config: config, slaveId: 1, dbPath: "historian.db");
           historianSub = stream.listen((HistorianData data) {
             if (data.error != null) {
               updateState(state.value.copyWith(error: "Historian Error: ${data.error}"));

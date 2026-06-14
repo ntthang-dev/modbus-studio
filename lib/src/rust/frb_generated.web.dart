@@ -10,6 +10,7 @@ import 'api/client.dart';
 import 'api/db.dart';
 import 'api/historian.dart';
 import 'api/scanner.dart';
+import 'api/server.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -31,6 +32,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   get rust_arc_decrement_strong_count_ModbusClientPtr => wire
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient;
 
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_ModbusSimulatorPtr => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator;
+
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw);
 
@@ -47,6 +52,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  ModbusSimulator
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    dynamic raw,
+  );
+
+  @protected
+  ModbusSimulator
+  dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    dynamic raw,
+  );
+
+  @protected
   DbClient
   dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     dynamic raw,
@@ -59,6 +76,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  ModbusSimulator
+  dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    dynamic raw,
+  );
+
+  @protected
   DbClient
   dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     dynamic raw,
@@ -67,6 +90,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   ModbusClient
   dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
+    dynamic raw,
+  );
+
+  @protected
+  ModbusSimulator
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
     dynamic raw,
   );
 
@@ -84,7 +113,46 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String dco_decode_String(dynamic raw);
 
   @protected
+  AlarmLog dco_decode_alarm_log(dynamic raw);
+
+  @protected
+  AlarmRule dco_decode_alarm_rule(dynamic raw);
+
+  @protected
   bool dco_decode_bool(dynamic raw);
+
+  @protected
+  AlarmLog dco_decode_box_autoadd_alarm_log(dynamic raw);
+
+  @protected
+  AlarmRule dco_decode_box_autoadd_alarm_rule(dynamic raw);
+
+  @protected
+  ConnectionConfig dco_decode_box_autoadd_connection_config(dynamic raw);
+
+  @protected
+  ConnectionProfile dco_decode_box_autoadd_connection_profile(dynamic raw);
+
+  @protected
+  PlatformInt64 dco_decode_box_autoadd_i_64(dynamic raw);
+
+  @protected
+  ScheduledWrite dco_decode_box_autoadd_scheduled_write(dynamic raw);
+
+  @protected
+  int dco_decode_box_autoadd_u_16(dynamic raw);
+
+  @protected
+  int dco_decode_box_autoadd_u_32(dynamic raw);
+
+  @protected
+  int dco_decode_box_autoadd_u_8(dynamic raw);
+
+  @protected
+  ConnectionConfig dco_decode_connection_config(dynamic raw);
+
+  @protected
+  ConnectionProfile dco_decode_connection_profile(dynamic raw);
 
   @protected
   HistorianData dco_decode_historian_data(dynamic raw);
@@ -96,6 +164,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 dco_decode_i_64(dynamic raw);
 
   @protected
+  List<AlarmLog> dco_decode_list_alarm_log(dynamic raw);
+
+  @protected
+  List<AlarmRule> dco_decode_list_alarm_rule(dynamic raw);
+
+  @protected
+  List<ConnectionProfile> dco_decode_list_connection_profile(dynamic raw);
+
+  @protected
   List<HistorianPoint> dco_decode_list_historian_point(dynamic raw);
 
   @protected
@@ -105,10 +182,28 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  List<ScheduledWrite> dco_decode_list_scheduled_write(dynamic raw);
+
+  @protected
   String? dco_decode_opt_String(dynamic raw);
 
   @protected
+  PlatformInt64? dco_decode_opt_box_autoadd_i_64(dynamic raw);
+
+  @protected
+  int? dco_decode_opt_box_autoadd_u_16(dynamic raw);
+
+  @protected
+  int? dco_decode_opt_box_autoadd_u_32(dynamic raw);
+
+  @protected
+  int? dco_decode_opt_box_autoadd_u_8(dynamic raw);
+
+  @protected
   RadarDevice dco_decode_radar_device(dynamic raw);
+
+  @protected
+  ScheduledWrite dco_decode_scheduled_write(dynamic raw);
 
   @protected
   int dco_decode_u_16(dynamic raw);
@@ -141,6 +236,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  ModbusSimulator
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ModbusSimulator
+  sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   DbClient
   sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     SseDeserializer deserializer,
@@ -153,6 +260,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  ModbusSimulator
+  sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   DbClient
   sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     SseDeserializer deserializer,
@@ -161,6 +274,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   ModbusClient
   sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ModbusSimulator
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
     SseDeserializer deserializer,
   );
 
@@ -178,7 +297,52 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String sse_decode_String(SseDeserializer deserializer);
 
   @protected
+  AlarmLog sse_decode_alarm_log(SseDeserializer deserializer);
+
+  @protected
+  AlarmRule sse_decode_alarm_rule(SseDeserializer deserializer);
+
+  @protected
   bool sse_decode_bool(SseDeserializer deserializer);
+
+  @protected
+  AlarmLog sse_decode_box_autoadd_alarm_log(SseDeserializer deserializer);
+
+  @protected
+  AlarmRule sse_decode_box_autoadd_alarm_rule(SseDeserializer deserializer);
+
+  @protected
+  ConnectionConfig sse_decode_box_autoadd_connection_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ConnectionProfile sse_decode_box_autoadd_connection_profile(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  PlatformInt64 sse_decode_box_autoadd_i_64(SseDeserializer deserializer);
+
+  @protected
+  ScheduledWrite sse_decode_box_autoadd_scheduled_write(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  int sse_decode_box_autoadd_u_16(SseDeserializer deserializer);
+
+  @protected
+  int sse_decode_box_autoadd_u_32(SseDeserializer deserializer);
+
+  @protected
+  int sse_decode_box_autoadd_u_8(SseDeserializer deserializer);
+
+  @protected
+  ConnectionConfig sse_decode_connection_config(SseDeserializer deserializer);
+
+  @protected
+  ConnectionProfile sse_decode_connection_profile(SseDeserializer deserializer);
 
   @protected
   HistorianData sse_decode_historian_data(SseDeserializer deserializer);
@@ -188,6 +352,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PlatformInt64 sse_decode_i_64(SseDeserializer deserializer);
+
+  @protected
+  List<AlarmLog> sse_decode_list_alarm_log(SseDeserializer deserializer);
+
+  @protected
+  List<AlarmRule> sse_decode_list_alarm_rule(SseDeserializer deserializer);
+
+  @protected
+  List<ConnectionProfile> sse_decode_list_connection_profile(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<HistorianPoint> sse_decode_list_historian_point(
@@ -201,10 +376,30 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  List<ScheduledWrite> sse_decode_list_scheduled_write(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   String? sse_decode_opt_String(SseDeserializer deserializer);
 
   @protected
+  PlatformInt64? sse_decode_opt_box_autoadd_i_64(SseDeserializer deserializer);
+
+  @protected
+  int? sse_decode_opt_box_autoadd_u_16(SseDeserializer deserializer);
+
+  @protected
+  int? sse_decode_opt_box_autoadd_u_32(SseDeserializer deserializer);
+
+  @protected
+  int? sse_decode_opt_box_autoadd_u_8(SseDeserializer deserializer);
+
+  @protected
   RadarDevice sse_decode_radar_device(SseDeserializer deserializer);
+
+  @protected
+  ScheduledWrite sse_decode_scheduled_write(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_16(SseDeserializer deserializer);
@@ -246,6 +441,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    ModbusSimulator self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    ModbusSimulator self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
   sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     DbClient self,
     SseSerializer serializer,
@@ -260,6 +469,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    ModbusSimulator self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
   sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDbClient(
     DbClient self,
     SseSerializer serializer,
@@ -269,6 +485,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void
   sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
     ModbusClient self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    ModbusSimulator self,
     SseSerializer serializer,
   );
 
@@ -288,7 +511,70 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_String(String self, SseSerializer serializer);
 
   @protected
+  void sse_encode_alarm_log(AlarmLog self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_alarm_rule(AlarmRule self, SseSerializer serializer);
+
+  @protected
   void sse_encode_bool(bool self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_alarm_log(
+    AlarmLog self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_alarm_rule(
+    AlarmRule self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_connection_config(
+    ConnectionConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_connection_profile(
+    ConnectionProfile self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_i_64(
+    PlatformInt64 self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_scheduled_write(
+    ScheduledWrite self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_u_16(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_u_32(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_u_8(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_connection_config(
+    ConnectionConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_connection_profile(
+    ConnectionProfile self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_historian_data(HistorianData self, SseSerializer serializer);
@@ -301,6 +587,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_alarm_log(List<AlarmLog> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_alarm_rule(
+    List<AlarmRule> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_connection_profile(
+    List<ConnectionProfile> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_historian_point(
@@ -321,10 +622,37 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_scheduled_write(
+    List<ScheduledWrite> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_String(String? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_opt_box_autoadd_i_64(
+    PlatformInt64? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_u_16(int? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_u_32(int? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_u_8(int? self, SseSerializer serializer);
+
+  @protected
   void sse_encode_radar_device(RadarDevice self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_scheduled_write(
+    ScheduledWrite self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_u_16(int self, SseSerializer serializer);
@@ -381,6 +709,22 @@ class RustLibWire implements BaseWire {
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
         ptr,
       );
+
+  void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    int ptr,
+  ) => wasmModule
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+        ptr,
+      );
+
+  void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    int ptr,
+  ) => wasmModule
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+        ptr,
+      );
 }
 
 @JS('wasm_bindgen')
@@ -406,6 +750,16 @@ extension type RustLibWasmModule._(JSObject _) implements JSObject {
 
   external void
   rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusClient(
+    int ptr,
+  );
+
+  external void
+  rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
+    int ptr,
+  );
+
+  external void
+  rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerModbusSimulator(
     int ptr,
   );
 }

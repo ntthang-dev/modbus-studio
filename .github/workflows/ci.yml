@@ -1,0 +1,96 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-lint:
+    name: Test and Lint (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+
+      - name: Install cargo-binstall
+        run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+      - name: Install flutter_rust_bridge_codegen
+        run: cargo binstall -y flutter_rust_bridge_codegen@2.12.0
+
+      - name: Generate FFI Bindings
+        run: flutter_rust_bridge_codegen generate
+
+      - name: Check for Uncommitted Codegen Changes
+        run: |
+          git status
+          git diff --exit-code || (echo "Error: Generated FFI bindings are out-of-sync. Please run 'flutter_rust_bridge_codegen generate' locally and commit the changes." && exit 1)
+
+      - name: Install Flutter Dependencies
+        run: flutter pub get
+
+      - name: Flutter Analyzer
+        run: flutter analyze
+
+      - name: Cargo Clippy
+        run: cargo clippy --manifest-path rust/Cargo.toml -- -D warnings
+
+      - name: Run Flutter Tests
+        run: flutter test
+
+      - name: Run Rust Unit Tests
+        run: cargo test --manifest-path rust/Cargo.toml
+
+  build-macos:
+    name: Build macOS Release
+    runs-on: macos-latest
+    needs: test-and-lint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install cargo-binstall
+        run: curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+      - name: Install flutter_rust_bridge_codegen
+        run: cargo binstall -y flutter_rust_bridge_codegen@2.12.0
+
+      - name: Generate FFI Bindings
+        run: flutter_rust_bridge_codegen generate
+
+      - name: Install Flutter Dependencies
+        run: flutter pub get
+
+      - name: Build macOS App Bundle
+        run: flutter build macos --no-codesign

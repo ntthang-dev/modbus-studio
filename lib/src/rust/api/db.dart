@@ -7,9 +7,99 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `init_db`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+
+Future<void> dbSaveProfile({
+  required String dbPath,
+  required ConnectionProfile profile,
+}) => RustLib.instance.api.crateApiDbDbSaveProfile(
+  dbPath: dbPath,
+  profile: profile,
+);
+
+Future<List<ConnectionProfile>> dbGetProfiles({required String dbPath}) =>
+    RustLib.instance.api.crateApiDbDbGetProfiles(dbPath: dbPath);
+
+Future<void> dbDeleteProfile({
+  required String dbPath,
+  required PlatformInt64 id,
+}) => RustLib.instance.api.crateApiDbDbDeleteProfile(dbPath: dbPath, id: id);
+
+Future<void> dbSaveRule({required String dbPath, required AlarmRule rule}) =>
+    RustLib.instance.api.crateApiDbDbSaveRule(dbPath: dbPath, rule: rule);
+
+Future<List<AlarmRule>> dbGetRules({required String dbPath}) =>
+    RustLib.instance.api.crateApiDbDbGetRules(dbPath: dbPath);
+
+Future<void> dbDeleteRule({
+  required String dbPath,
+  required PlatformInt64 id,
+}) => RustLib.instance.api.crateApiDbDbDeleteRule(dbPath: dbPath, id: id);
+
+Future<void> dbLogAlarm({required String dbPath, required AlarmLog log}) =>
+    RustLib.instance.api.crateApiDbDbLogAlarm(dbPath: dbPath, log: log);
+
+Future<List<AlarmLog>> dbGetAlarmLogs({required String dbPath}) =>
+    RustLib.instance.api.crateApiDbDbGetAlarmLogs(dbPath: dbPath);
+
+Future<void> dbClearAlarmLogs({required String dbPath}) =>
+    RustLib.instance.api.crateApiDbDbClearAlarmLogs(dbPath: dbPath);
+
+Future<void> dbPrunePollLogs({
+  required String dbPath,
+  required PlatformInt64 maxRows,
+}) => RustLib.instance.api.crateApiDbDbPrunePollLogs(
+  dbPath: dbPath,
+  maxRows: maxRows,
+);
+
+Future<void> dbPruneAlarmLogs({
+  required String dbPath,
+  required PlatformInt64 maxRows,
+}) => RustLib.instance.api.crateApiDbDbPruneAlarmLogs(
+  dbPath: dbPath,
+  maxRows: maxRows,
+);
+
+Future<void> dbSaveScheduledWrite({
+  required String dbPath,
+  required ScheduledWrite write,
+}) => RustLib.instance.api.crateApiDbDbSaveScheduledWrite(
+  dbPath: dbPath,
+  write: write,
+);
+
+Future<List<ScheduledWrite>> dbGetScheduledWrites({required String dbPath}) =>
+    RustLib.instance.api.crateApiDbDbGetScheduledWrites(dbPath: dbPath);
+
+Future<void> dbDeleteScheduledWrite({
+  required String dbPath,
+  required PlatformInt64 id,
+}) => RustLib.instance.api.crateApiDbDbDeleteScheduledWrite(
+  dbPath: dbPath,
+  id: id,
+);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DbClient>>
 abstract class DbClient implements RustOpaqueInterface {
+  Future<void> clearAlarmLogs();
+
+  Future<void> deleteProfile({required PlatformInt64 id});
+
+  Future<void> deleteRule({required PlatformInt64 id});
+
+  Future<void> deleteScheduledWrite({required PlatformInt64 id});
+
+  Future<List<AlarmLog>> getAlarmLogs();
+
+  Future<List<ConnectionProfile>> getProfiles();
+
+  Future<List<AlarmRule>> getRules();
+
+  Future<List<ScheduledWrite>> getScheduledWrites();
+
+  Future<void> logAlarm({required AlarmLog log});
+
   Future<void> logData({
     required String ipAddress,
     required int address,
@@ -19,4 +109,221 @@ abstract class DbClient implements RustOpaqueInterface {
   // HINT: Make it `#[frb(sync)]` to let it become the default constructor of Dart class.
   static Future<DbClient> newInstance({required String dbPath}) =>
       RustLib.instance.api.crateApiDbDbClientNew(dbPath: dbPath);
+
+  Future<void> pruneAlarmLogs({required PlatformInt64 maxRows});
+
+  Future<void> prunePollLogs({required PlatformInt64 maxRows});
+
+  Future<void> saveProfile({required ConnectionProfile profile});
+
+  Future<void> saveRule({required AlarmRule rule});
+
+  Future<void> saveScheduledWrite({required ScheduledWrite write});
+}
+
+class AlarmLog {
+  final PlatformInt64? id;
+  final PlatformInt64? ruleId;
+  final int registerAddress;
+  final int value;
+  final String message;
+  final String severity;
+  final PlatformInt64 timestamp;
+
+  const AlarmLog({
+    this.id,
+    this.ruleId,
+    required this.registerAddress,
+    required this.value,
+    required this.message,
+    required this.severity,
+    required this.timestamp,
+  });
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      ruleId.hashCode ^
+      registerAddress.hashCode ^
+      value.hashCode ^
+      message.hashCode ^
+      severity.hashCode ^
+      timestamp.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AlarmLog &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          ruleId == other.ruleId &&
+          registerAddress == other.registerAddress &&
+          value == other.value &&
+          message == other.message &&
+          severity == other.severity &&
+          timestamp == other.timestamp;
+}
+
+class AlarmRule {
+  final PlatformInt64? id;
+  final String name;
+  final int registerAddress;
+  final String condition;
+  final int threshold;
+  final String severity;
+  final bool isEnabled;
+
+  const AlarmRule({
+    this.id,
+    required this.name,
+    required this.registerAddress,
+    required this.condition,
+    required this.threshold,
+    required this.severity,
+    required this.isEnabled,
+  });
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      registerAddress.hashCode ^
+      condition.hashCode ^
+      threshold.hashCode ^
+      severity.hashCode ^
+      isEnabled.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AlarmRule &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          registerAddress == other.registerAddress &&
+          condition == other.condition &&
+          threshold == other.threshold &&
+          severity == other.severity &&
+          isEnabled == other.isEnabled;
+}
+
+class ConnectionConfig {
+  final String protocolType;
+  final String? ip;
+  final int? port;
+  final String? portName;
+  final int? baudRate;
+  final String? parity;
+  final int? dataBits;
+  final int? stopBits;
+
+  const ConnectionConfig({
+    required this.protocolType,
+    this.ip,
+    this.port,
+    this.portName,
+    this.baudRate,
+    this.parity,
+    this.dataBits,
+    this.stopBits,
+  });
+
+  @override
+  int get hashCode =>
+      protocolType.hashCode ^
+      ip.hashCode ^
+      port.hashCode ^
+      portName.hashCode ^
+      baudRate.hashCode ^
+      parity.hashCode ^
+      dataBits.hashCode ^
+      stopBits.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConnectionConfig &&
+          runtimeType == other.runtimeType &&
+          protocolType == other.protocolType &&
+          ip == other.ip &&
+          port == other.port &&
+          portName == other.portName &&
+          baudRate == other.baudRate &&
+          parity == other.parity &&
+          dataBits == other.dataBits &&
+          stopBits == other.stopBits;
+}
+
+class ConnectionProfile {
+  final PlatformInt64? id;
+  final String name;
+  final ConnectionConfig config;
+  final bool isFavorite;
+  final PlatformInt64 lastUsed;
+
+  const ConnectionProfile({
+    this.id,
+    required this.name,
+    required this.config,
+    required this.isFavorite,
+    required this.lastUsed,
+  });
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      config.hashCode ^
+      isFavorite.hashCode ^
+      lastUsed.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConnectionProfile &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          config == other.config &&
+          isFavorite == other.isFavorite &&
+          lastUsed == other.lastUsed;
+}
+
+class ScheduledWrite {
+  final PlatformInt64? id;
+  final int address;
+  final int value;
+  final int intervalSecs;
+  final bool isCoil;
+  final bool isEnabled;
+
+  const ScheduledWrite({
+    this.id,
+    required this.address,
+    required this.value,
+    required this.intervalSecs,
+    required this.isCoil,
+    required this.isEnabled,
+  });
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      address.hashCode ^
+      value.hashCode ^
+      intervalSecs.hashCode ^
+      isCoil.hashCode ^
+      isEnabled.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ScheduledWrite &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          address == other.address &&
+          value == other.value &&
+          intervalSecs == other.intervalSecs &&
+          isCoil == other.isCoil &&
+          isEnabled == other.isEnabled;
 }
