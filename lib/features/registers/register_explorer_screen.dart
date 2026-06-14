@@ -500,7 +500,7 @@ class RegisterExplorerScreen extends HookConsumerWidget {
         LineChartData(
           gridData: const FlGridData(show: false),
           titlesData: const FlTitlesData(show: false),
-          borderData: const FlBorderData(show: false),
+          borderData: FlBorderData(show: false),
           lineTouchData: const LineTouchData(enabled: false),
           lineBarsData: [
             LineChartBarData(

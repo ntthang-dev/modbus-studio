@@ -90,7 +90,6 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
       debugPrint("Error disconnecting client during cleanup: $e");
     }
     _client = null;
-    ref.read(sparklineProvider.notifier).clear();
   }
 
   Future<void> connect(ConnectionConfig config, {int slaveId = 1}) async {
@@ -362,6 +361,11 @@ final registerConfigProvider =
 class SparklineNotifier extends Notifier<Map<int, List<double>>> {
   @override
   Map<int, List<double>> build() {
+    ref.listen<ConnectionStatus>(connectionProvider, (prev, next) {
+      if (!next.isConnected) {
+        state = const {};
+      }
+    });
     return const {};
   }
 
