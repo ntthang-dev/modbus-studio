@@ -349,6 +349,32 @@ class UserManualScreen extends HookConsumerWidget {
         _buildBasicsCard('Discrete Inputs (FC02)', 'Read-Only', 'Single-bit binary states (discrete inputs). Used for limit switches, proximity sensors, and status signals.', textColor, isField),
         _buildBasicsCard('Holding Registers (FC03)', 'Read / Write', '16-bit analog registers. Used for configuration parameters, setpoints, and analog control outputs.', textColor, isField),
         _buildBasicsCard('Input Registers (FC04)', 'Read-Only', '16-bit analog registers. Used for sensor measurements, telemetry metrics, and status words.', textColor, isField),
+
+        const SizedBox(height: 24),
+        Text('Advanced Data Representation', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: sectionTitleColor)),
+        const SizedBox(height: 8),
+        Text(
+          'Standard Modbus registers are 16-bit words. To represent larger or different data types, multiple registers are combined or decoded specially:',
+          style: TextStyle(fontSize: 13, color: subtitleColor, height: 1.4),
+        ),
+        const SizedBox(height: 10),
+        _buildBulletPoint('ASCII / String', 'Each 16-bit register holds 2 ASCII characters (1 byte per char). Example: Register 40010 = 0x4D6F ("Mo").', textColor),
+        _buildBulletPoint('Bitfield / BITMAP', 'Individual bits (0-15) of a 16-bit register represent distinct status flags. Bit 0 is the least significant bit.', textColor),
+        _buildBulletPoint('ENUM (Enumerated)', 'Numeric values map to predefined status labels. Example: 0 = Offline, 1 = Running, 2 = Fault.', textColor),
+        _buildBulletPoint('32-Bit Types (Int32 / Float32)', 'Two consecutive registers (32 bits) are combined. Float32 uses IEEE 754 format. Word swapping may be required depending on device endianness.', textColor),
+        _buildBulletPoint('DateTime Timestamps', 'DateTime32 decodes 2 registers as a 32-bit Unix epoch (seconds). DateTime64 decodes 4 registers as a 64-bit Unix epoch (milliseconds).', textColor),
+
+        const SizedBox(height: 24),
+        Text('Linear Scaling & Calibration', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: sectionTitleColor)),
+        const SizedBox(height: 8),
+        Text(
+          'Linear scaling converts raw register sensor readings into engineering units (e.g. Celsius, Volts, PSI) using the slope-intercept equation y = mx + c:',
+          style: TextStyle(fontSize: 13, color: subtitleColor, height: 1.4),
+        ),
+        const SizedBox(height: 10),
+        _buildBulletPoint('Multiplier (m)', 'The slope (scale factor) by which the raw value is multiplied. Example: m = 0.1 for a temperature sensor reading tenths of a degree.', textColor),
+        _buildBulletPoint('Offset (c)', 'The Y-intercept shift added or subtracted from the value. Example: c = -40.0 for offset adjustments.', textColor),
+        _buildBulletPoint('Complete Equation', 'Scaled Value = (Raw Value × Multiplier) + Offset. Example: raw value 1000 with m = 0.1, c = -40.0 results in 60.0.', textColor),
       ],
     );
   }

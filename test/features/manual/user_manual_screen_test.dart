@@ -64,6 +64,11 @@ void main() {
       expect(find.textContaining('CRC Error Detection'), findsOneWidget);
       expect(find.textContaining('MBAP Header'), findsOneWidget);
       expect(find.textContaining('Coils (FC01)'), findsOneWidget);
+      expect(find.textContaining('Advanced Data Representation'), findsOneWidget);
+      expect(find.textContaining('ASCII / String'), findsOneWidget);
+      expect(find.textContaining('Bitfield / BITMAP'), findsOneWidget);
+      expect(find.textContaining('ENUM (Enumerated)'), findsOneWidget);
+      expect(find.textContaining('Linear Scaling & Calibration'), findsOneWidget);
     });
 
     testWidgets('navigates to Scripting Engine and renders code block', (tester) async {
