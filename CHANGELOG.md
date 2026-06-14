@@ -17,6 +17,12 @@ This is the initial production-ready release of Modbus Studio, an industrial-gra
   - Sandboxed QuickJS scripting environment (`flutter_js` integration) enabling custom logic execution against live PLC register inputs.
   - Safe UI/Dart log piping and script console displaying run results.
   - Native fallback logic ensuring compilation/testing works in headless CI/CD environments.
+- **Compliance & Handover Reports Module**:
+  - Implemented a rich graphical Reports Screen featuring dynamic date-range selector cards (Snapshot, 24h, 7d, custom date picker) and format buttons (PDF, CSV).
+  - Configured optimized asynchronous SQLite range-based telemetry and alarm history queries in Rust and bridged them to Dart.
+  - Integrated native macOS save/share sheet dialog triggers for both PDF and CSV exports.
+  - Enabled headless automation exports in the QuickJS sandbox using `Modbus.exportReport(format, rangeHours)` writing to `~/Documents/ModbusStudio/Reports/`.
+  - Added robust widget test coverage verifying interactive state selection, layout sizing, and offline error boundaries.
 - **SQLite Database & Alarms Integration**:
   - Persistent Alarm Rules with configurable high/low threshold alerts.
   - Alarm logging database engine recording active/resolved status with operator acknowledgment capabilities.
