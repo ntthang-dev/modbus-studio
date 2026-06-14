@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter/hooks.dart';
+import 'package:flutter/services.dart';
 import 'package:modbus_studio/providers/ui_provider.dart';
 import 'package:modbus_studio/providers/radar_provider.dart';
 import 'package:modbus_studio/providers/connection_provider.dart';
@@ -18,6 +19,7 @@ class DeviceScannerScreen extends HookConsumerWidget {
     final connNotifier = ref.read(connectionProvider.notifier);
     
     final subnetController = useTextEditingController(text: '192.168.1');
+    final portController = useTextEditingController(text: '502');
 
     return CustomScrollView(
       slivers: [
@@ -65,14 +67,39 @@ class DeviceScannerScreen extends HookConsumerWidget {
                   Row(
                     children: [
                       Expanded(
+                        flex: 3,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Subnet Prefix', style: TextStyle(color: CupertinoColors.systemGrey2, fontSize: 12)),
+                            const Text('Subnet Prefix or Target IP', style: TextStyle(color: CupertinoColors.systemGrey2, fontSize: 12)),
                             const SizedBox(height: 6),
                             CupertinoTextField(
                               controller: subnetController,
-                              placeholder: '192.168.1',
+                              placeholder: '192.168.1 or 127.0.0.1',
+                              style: const TextStyle(color: CupertinoColors.white, fontFamily: 'SF Mono'),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E1E24),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFF2C2C35)),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 1,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Port', style: TextStyle(color: CupertinoColors.systemGrey2, fontSize: 12)),
+                            const SizedBox(height: 6),
+                            CupertinoTextField(
+                              controller: portController,
+                              placeholder: '502',
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                               style: const TextStyle(color: CupertinoColors.white, fontFamily: 'SF Mono'),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF1E1E24),
@@ -96,13 +123,9 @@ class DeviceScannerScreen extends HookConsumerWidget {
                                 radarNotifier.stopScan();
                               } else {
                                 final prefix = subnetController.text.trim();
+                                final portVal = int.tryParse(portController.text) ?? 502;
                                 if (prefix.isNotEmpty) {
-                                  // Wait, we need to allow custom subnets. 
-                                  // Let's modify startScan in radarNotifier to accept a subnet param.
-                                  // For now we will trigger startScan which defaults to "192.168.1".
-                                  // But we can actually use radarNotifier.startScan() directly, 
-                                  // or customize it if we make changes to radar_provider.
-                                  radarNotifier.startScan();
+                                  radarNotifier.startScan(target: prefix, port: portVal);
                                 }
                               }
                             },
@@ -201,7 +224,7 @@ class DeviceScannerScreen extends HookConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(device.ip, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: CupertinoColors.white, fontFamily: 'SF Mono')),
+                                Text('${device.ip}:${device.port} (ID ${device.slaveId})', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: CupertinoColors.white, fontFamily: 'SF Mono')),
                                 const SizedBox(height: 4),
                                 Row(
                                   children: [
@@ -213,7 +236,7 @@ class DeviceScannerScreen extends HookConsumerWidget {
                                     const SizedBox(width: 6),
                                     Text(
                                       '${device.status} · ${device.latencyMs}ms',
-                                      style: TextStyle(fontSize: 12, color: CupertinoColors.systemGrey),
+                                      style: const TextStyle(fontSize: 12, color: CupertinoColors.systemGrey),
                                     ),
                                   ],
                                 ),
@@ -230,8 +253,9 @@ class DeviceScannerScreen extends HookConsumerWidget {
                                 ConnectionConfig(
                                   protocolType: 'TCP',
                                   ip: device.ip,
-                                  port: 502,
+                                  port: device.port,
                                 ),
+                                slaveId: device.slaveId,
                               );
                               if (ref.read(connectionProvider).isConnected) {
                                 uiNotifier.setScreen(AppScreen.registers);
