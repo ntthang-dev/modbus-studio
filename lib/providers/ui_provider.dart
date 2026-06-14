@@ -15,6 +15,7 @@ enum AppScreen {
   reports,
   settings,
   automation,
+  manual,
 }
 
 class UiState {

@@ -18,6 +18,7 @@ import 'package:modbus_studio/features/alarms/alarms_screen.dart';
 import 'package:modbus_studio/features/reports/reports_screen.dart';
 import 'package:modbus_studio/features/automation/automation_screen.dart';
 import 'package:modbus_studio/features/scripting/scripting_screen.dart';
+import 'package:modbus_studio/features/manual/user_manual_screen.dart';
 
 
 
@@ -373,6 +374,7 @@ class ResponsiveNavigationShell extends HookConsumerWidget {
                     _buildSidebarItem(ref, AppScreen.automation, CupertinoIcons.timer_fill, 'Automation Scheduler', uiState.currentScreen),
                     _buildSidebarItem(ref, AppScreen.reports, CupertinoIcons.doc_text_fill, 'Reports', uiState.currentScreen),
                     _buildSidebarItem(ref, AppScreen.settings, CupertinoIcons.settings_solid, 'Settings', uiState.currentScreen),
+                    _buildSidebarItem(ref, AppScreen.manual, CupertinoIcons.book_fill, 'User Manual', uiState.currentScreen),
                   ],
                 ),
               ),
@@ -466,6 +468,8 @@ class ResponsiveNavigationShell extends HookConsumerWidget {
         return const AutomationScreen();
       case AppScreen.scripting:
         return const ScriptingScreen();
+      case AppScreen.manual:
+        return const UserManualScreen();
       default:
         return Center(
           child: Column(
@@ -720,6 +724,8 @@ class ResponsiveNavigationShell extends HookConsumerWidget {
         return 'Settings';
       case AppScreen.automation:
         return 'Automation Scheduler';
+      case AppScreen.manual:
+        return 'User Manual';
     }
   }
 }
