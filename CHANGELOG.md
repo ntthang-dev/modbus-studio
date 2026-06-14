@@ -8,6 +8,46 @@ Developer & Copywriter: **ntthang-dev**
 
 ---
 
+## [1.1.0] - 2026-06-14
+
+This minor release introduces dynamic register range polling and customizable formatting/scaling for individual registers in the Register Explorer.
+
+### Added
+- **Multi-Type Modbus Polling (FC01, FC02, FC04)**:
+  - Extended native Rust client and historian to poll Coils (FC01), Discrete Inputs (FC02), and Input Registers (FC04) dynamically.
+  - Implemented thread-safe buffer mappings converting discrete states into standard FFI data streams.
+- **Dynamic Poll Range Selector**:
+  - Designed a premium header configuration card allowing operators to dynamically switch Modbus function codes, starting address, and register quantities.
+- **Per-Register Data Formatting**:
+  - Implemented robust UI decoders translating raw 16-bit register values into Int16, Uint16, Int32, Uint32, Float32, Binary, Hex, and Boolean representations.
+  - Added support for 32-bit registers (occupying 2 adjacent words) with customizable word orders.
+- **Custom Linear Scaling**:
+  - Added custom scaling parameters (Multiplier, Offset, Suffix Units) configurable per register to display raw metrics as physical units (e.g. °C, PSI).
+- **Persistent Register Configurations**:
+  - Created a local SQLite persistence table storing formatting and scaling selections per register address.
+
+## [1.0.1] - 2026-06-14
+
+This patch release delivers a major UI/UX refactor of the Connection Hub screen, transitioning it fully to the Liquid Control Deck design system, improving usability, and stabilizing widget tests.
+
+### Added
+- **Liquid Control Deck UI for Connection Hub**:
+  - Implemented visual indicators, status lights, and responsive action bars matching the app's modern industrial SCADA aesthetic (Teal for connected, Amber for caution/connecting, Red for error, Violet for idle).
+  - Added subtle micro-animations (hover transitions, pulsing status dots, and folder expand/collapse transitions).
+- **Optimized Touch Targets & Legibility**:
+  - Re-spaced interactive buttons and inputs to exceed 48x48dp, making the interface safe for operators using tablets or touchscreens in high-glare field environments.
+
+### Changed
+- **Form Grouping & Cognitive Load Reduction**:
+  - Restructured Modbus configuration forms into distinct logical blocks (e.g., protocol selector, network/serial params, and advanced registers settings).
+  - Utilized progressive disclosure to hide advanced options until requested.
+- **Refined Site Folder Navigation**:
+  - Simplified parent folder selection and profile organization.
+
+### Fixed
+- **Widget Test Flakiness**:
+  - Stabilized `connection_hub_screen_test.dart` by resolving infinite animation timer pumps and viewport overflow issues during headless test execution.
+
 ## [1.0.0] - 2026-06-14
 
 This is the initial production-ready release of Modbus Studio, an industrial-grade Modbus SCADA workstation application built on a Flutter UI and a high-performance native Rust core.

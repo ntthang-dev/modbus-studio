@@ -58,6 +58,9 @@ pub fn start_historian_loop(
     config: ConnectionConfig,
     slave_id: u8,
     db_path: String,
+    function_code: u8,
+    start_address: u16,
+    quantity: u16,
     sink: StreamSink<HistorianData>
 ) -> anyhow::Result<()> {
     tokio::spawn(async move {
@@ -95,11 +98,32 @@ pub fn start_historian_loop(
             }
 
             if let Some(client) = &client_opt {
-                match client.read_holding_registers(0, 10).await {
+                let result = match function_code {
+                    1 => match client.read_coils(start_address, quantity).await {
+                        Ok(coils) => Ok(coils.into_iter().map(|b| if b { 1 } else { 0 }).collect()),
+                        Err(e) => Err(e),
+                    },
+                    2 => match client.read_discrete_inputs(start_address, quantity).await {
+                        Ok(inputs) => Ok(inputs.into_iter().map(|b| if b { 1 } else { 0 }).collect()),
+                        Err(e) => Err(e),
+                    },
+                    3 => client.read_holding_registers(start_address, quantity).await,
+                    4 => client.read_input_registers(start_address, quantity).await,
+                    _ => Err(anyhow::anyhow!("Unsupported function code: {}", function_code)),
+                };
+
+                match result {
                     Ok(data) => {
                         // Log to DB
+                        let address_prefix = match function_code {
+                            1 => 1,
+                            2 => 10001,
+                            3 => 40001,
+                            4 => 30001,
+                            _ => 40001,
+                        };
                         for (i, &val) in data.iter().enumerate() {
-                            let _ = db.log_data(&device_key, 40000 + i as u16 + 1, val);
+                            let _ = db.log_data(&device_key, address_prefix + start_address + i as u16, val);
                         }
                         
                         // Send to Flutter

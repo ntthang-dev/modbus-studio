@@ -83,10 +83,46 @@ impl ModbusClient {
         })
     }
 
+    pub async fn read_coils(&self, address: u16, quantity: u16) -> anyhow::Result<Vec<bool>> {
+        let mut ctx = self.context.lock().await;
+        
+        let read_future = ctx.read_coils(address, quantity);
+        let response = tokio::time::timeout(Duration::from_secs(2), read_future)
+            .await
+            .map_err(|_| anyhow::anyhow!("Read timeout"))??;
+            
+        let data = response.map_err(|e| anyhow::anyhow!("Modbus Exception: {:?}", e))?;
+        Ok(data)
+    }
+
+    pub async fn read_discrete_inputs(&self, address: u16, quantity: u16) -> anyhow::Result<Vec<bool>> {
+        let mut ctx = self.context.lock().await;
+        
+        let read_future = ctx.read_discrete_inputs(address, quantity);
+        let response = tokio::time::timeout(Duration::from_secs(2), read_future)
+            .await
+            .map_err(|_| anyhow::anyhow!("Read timeout"))??;
+            
+        let data = response.map_err(|e| anyhow::anyhow!("Modbus Exception: {:?}", e))?;
+        Ok(data)
+    }
+
     pub async fn read_holding_registers(&self, address: u16, quantity: u16) -> anyhow::Result<Vec<u16>> {
         let mut ctx = self.context.lock().await;
         
         let read_future = ctx.read_holding_registers(address, quantity);
+        let response = tokio::time::timeout(Duration::from_secs(2), read_future)
+            .await
+            .map_err(|_| anyhow::anyhow!("Read timeout"))??;
+            
+        let data = response.map_err(|e| anyhow::anyhow!("Modbus Exception: {:?}", e))?;
+        Ok(data)
+    }
+
+    pub async fn read_input_registers(&self, address: u16, quantity: u16) -> anyhow::Result<Vec<u16>> {
+        let mut ctx = self.context.lock().await;
+        
+        let read_future = ctx.read_input_registers(address, quantity);
         let response = tokio::time::timeout(Duration::from_secs(2), read_future)
             .await
             .map_err(|_| anyhow::anyhow!("Read timeout"))??;

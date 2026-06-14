@@ -137,7 +137,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 dco_decode_box_autoadd_i_64(dynamic raw);
 
   @protected
+  RegisterConfig dco_decode_box_autoadd_register_config(dynamic raw);
+
+  @protected
   ScheduledWrite dco_decode_box_autoadd_scheduled_write(dynamic raw);
+
+  @protected
+  Site dco_decode_box_autoadd_site(dynamic raw);
 
   @protected
   int dco_decode_box_autoadd_u_16(dynamic raw);
@@ -155,6 +161,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ConnectionProfile dco_decode_connection_profile(dynamic raw);
 
   @protected
+  double dco_decode_f_64(dynamic raw);
+
+  @protected
   HistorianData dco_decode_historian_data(dynamic raw);
 
   @protected
@@ -170,6 +179,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<AlarmRule> dco_decode_list_alarm_rule(dynamic raw);
 
   @protected
+  List<bool> dco_decode_list_bool(dynamic raw);
+
+  @protected
   List<ConnectionProfile> dco_decode_list_connection_profile(dynamic raw);
 
   @protected
@@ -182,7 +194,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  List<RegisterConfig> dco_decode_list_register_config(dynamic raw);
+
+  @protected
   List<ScheduledWrite> dco_decode_list_scheduled_write(dynamic raw);
+
+  @protected
+  List<Site> dco_decode_list_site(dynamic raw);
 
   @protected
   String? dco_decode_opt_String(dynamic raw);
@@ -203,7 +221,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RadarDevice dco_decode_radar_device(dynamic raw);
 
   @protected
+  RegisterConfig dco_decode_register_config(dynamic raw);
+
+  @protected
   ScheduledWrite dco_decode_scheduled_write(dynamic raw);
+
+  @protected
+  Site dco_decode_site(dynamic raw);
 
   @protected
   int dco_decode_u_16(dynamic raw);
@@ -325,9 +349,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 sse_decode_box_autoadd_i_64(SseDeserializer deserializer);
 
   @protected
+  RegisterConfig sse_decode_box_autoadd_register_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   ScheduledWrite sse_decode_box_autoadd_scheduled_write(
     SseDeserializer deserializer,
   );
+
+  @protected
+  Site sse_decode_box_autoadd_site(SseDeserializer deserializer);
 
   @protected
   int sse_decode_box_autoadd_u_16(SseDeserializer deserializer);
@@ -345,6 +377,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ConnectionProfile sse_decode_connection_profile(SseDeserializer deserializer);
 
   @protected
+  double sse_decode_f_64(SseDeserializer deserializer);
+
+  @protected
   HistorianData sse_decode_historian_data(SseDeserializer deserializer);
 
   @protected
@@ -358,6 +393,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<AlarmRule> sse_decode_list_alarm_rule(SseDeserializer deserializer);
+
+  @protected
+  List<bool> sse_decode_list_bool(SseDeserializer deserializer);
 
   @protected
   List<ConnectionProfile> sse_decode_list_connection_profile(
@@ -376,9 +414,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  List<RegisterConfig> sse_decode_list_register_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<ScheduledWrite> sse_decode_list_scheduled_write(
     SseDeserializer deserializer,
   );
+
+  @protected
+  List<Site> sse_decode_list_site(SseDeserializer deserializer);
 
   @protected
   String? sse_decode_opt_String(SseDeserializer deserializer);
@@ -399,7 +445,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RadarDevice sse_decode_radar_device(SseDeserializer deserializer);
 
   @protected
+  RegisterConfig sse_decode_register_config(SseDeserializer deserializer);
+
+  @protected
   ScheduledWrite sse_decode_scheduled_write(SseDeserializer deserializer);
+
+  @protected
+  Site sse_decode_site(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_16(SseDeserializer deserializer);
@@ -550,10 +602,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_register_config(
+    RegisterConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_scheduled_write(
     ScheduledWrite self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_box_autoadd_site(Site self, SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_u_16(int self, SseSerializer serializer);
@@ -577,6 +638,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_f_64(double self, SseSerializer serializer);
+
+  @protected
   void sse_encode_historian_data(HistorianData self, SseSerializer serializer);
 
   @protected
@@ -596,6 +660,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     List<AlarmRule> self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_list_bool(List<bool> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_connection_profile(
@@ -622,10 +689,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_register_config(
+    List<RegisterConfig> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_scheduled_write(
     List<ScheduledWrite> self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_list_site(List<Site> self, SseSerializer serializer);
 
   @protected
   void sse_encode_opt_String(String? self, SseSerializer serializer);
@@ -649,10 +725,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_radar_device(RadarDevice self, SseSerializer serializer);
 
   @protected
+  void sse_encode_register_config(
+    RegisterConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_scheduled_write(
     ScheduledWrite self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_site(Site self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_16(int self, SseSerializer serializer);

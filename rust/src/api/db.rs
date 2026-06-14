@@ -1,3 +1,4 @@
+// Copyright (c) 2026 ntthang-dev. All rights reserved.
 use rusqlite::Connection;
 use std::sync::Mutex;
 
@@ -13,6 +14,13 @@ pub struct ConnectionConfig {
     pub stop_bits: Option<u8>,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct Site {
+    pub id: Option<i64>,
+    pub name: String,
+    pub description: Option<String>,
+}
+
 #[derive(Clone, Debug)]
 pub struct ConnectionProfile {
     pub id: Option<i64>,
@@ -20,6 +28,7 @@ pub struct ConnectionProfile {
     pub config: ConnectionConfig,
     pub is_favorite: bool,
     pub last_used: i64, // Unix timestamp in milliseconds
+    pub site_id: Option<i64>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -52,6 +61,16 @@ pub struct ScheduledWrite {
     pub interval_secs: u32,
     pub is_coil: bool,
     pub is_enabled: bool,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct RegisterConfig {
+    pub device_key: String,
+    pub address: u16,
+    pub data_type: String,
+    pub multiplier: f64,
+    pub offset: f64,
+    pub unit: String,
 }
 
 pub struct DbClient {
@@ -90,6 +109,15 @@ impl DbClient {
         )?;
 
         conn.execute(
+            "CREATE TABLE IF NOT EXISTS sites (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                description TEXT
+            )",
+            [],
+        )?;
+
+        conn.execute(
             "CREATE TABLE IF NOT EXISTS connection_profiles (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -102,10 +130,14 @@ impl DbClient {
                 data_bits INTEGER,
                 stop_bits INTEGER,
                 is_favorite INTEGER NOT NULL DEFAULT 0,
-                last_used INTEGER NOT NULL DEFAULT 0
+                last_used INTEGER NOT NULL DEFAULT 0,
+                site_id INTEGER
             )",
             [],
         )?;
+
+        // Silent migration to add site_id column if connection_profiles table already exists
+        let _ = conn.execute("ALTER TABLE connection_profiles ADD COLUMN site_id INTEGER", []);
 
         conn.execute(
             "CREATE TABLE IF NOT EXISTS alarm_rules (
@@ -145,6 +177,19 @@ impl DbClient {
             [],
         )?;
 
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS register_configs (
+                device_key TEXT NOT NULL,
+                address INTEGER NOT NULL,
+                data_type TEXT NOT NULL,
+                multiplier REAL NOT NULL DEFAULT 1.0,
+                offset REAL NOT NULL DEFAULT 0.0,
+                unit TEXT NOT NULL DEFAULT '',
+                PRIMARY KEY (device_key, address)
+            )",
+            [],
+        )?;
+
         // Create indexes on timestamp columns for range query performance
         conn.execute("CREATE INDEX IF NOT EXISTS idx_poll_logs_timestamp ON poll_logs (timestamp)", [])?;
         conn.execute("CREATE INDEX IF NOT EXISTS idx_alarm_logs_timestamp ON alarm_logs (timestamp)", [])?;
@@ -175,8 +220,8 @@ impl DbClient {
                 "UPDATE connection_profiles 
                  SET name = ?1, protocol_type = ?2, host = ?3, port = ?4, port_name = ?5, 
                      baud_rate = ?6, parity = ?7, data_bits = ?8, stop_bits = ?9, 
-                     is_favorite = ?10, last_used = ?11 
-                 WHERE id = ?12",
+                     is_favorite = ?10, last_used = ?11, site_id = ?12
+                 WHERE id = ?13",
                 (
                     &profile.name,
                     &profile.config.protocol_type,
@@ -189,14 +234,15 @@ impl DbClient {
                     stop_bits_i32,
                     is_favorite_int,
                     profile.last_used,
+                    profile.site_id,
                     id,
                 ),
             )?;
         } else {
             conn.execute(
                 "INSERT INTO connection_profiles 
-                 (name, protocol_type, host, port, port_name, baud_rate, parity, data_bits, stop_bits, is_favorite, last_used) 
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+                 (name, protocol_type, host, port, port_name, baud_rate, parity, data_bits, stop_bits, is_favorite, last_used, site_id) 
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
                 (
                     &profile.name,
                     &profile.config.protocol_type,
@@ -209,6 +255,7 @@ impl DbClient {
                     stop_bits_i32,
                     is_favorite_int,
                     profile.last_used,
+                    profile.site_id,
                 ),
             )?;
         }
@@ -218,7 +265,7 @@ impl DbClient {
     pub fn get_profiles(&self) -> anyhow::Result<Vec<ConnectionProfile>> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
-            "SELECT id, name, protocol_type, host, port, port_name, baud_rate, parity, data_bits, stop_bits, is_favorite, last_used 
+            "SELECT id, name, protocol_type, host, port, port_name, baud_rate, parity, data_bits, stop_bits, is_favorite, last_used, site_id 
              FROM connection_profiles 
              ORDER BY is_favorite DESC, last_used DESC"
         )?;
@@ -236,6 +283,7 @@ impl DbClient {
             let stop_bits: Option<i32> = row.get(9)?;
             let is_favorite_int: i32 = row.get(10)?;
             let last_used: i64 = row.get(11)?;
+            let site_id: Option<i64> = row.get(12)?;
 
             let config = ConnectionConfig {
                 protocol_type,
@@ -254,6 +302,7 @@ impl DbClient {
                 config,
                 is_favorite: is_favorite_int == 1,
                 last_used,
+                site_id,
             })
         })?;
 
@@ -269,6 +318,50 @@ impl DbClient {
         conn.execute("DELETE FROM connection_profiles WHERE id = ?1", [id])?;
         Ok(())
     }
+
+    pub fn save_site(&self, site: Site) -> anyhow::Result<()> {
+        let conn = self.conn.lock().unwrap();
+        if let Some(id) = site.id {
+            conn.execute(
+                "UPDATE sites SET name = ?1, description = ?2 WHERE id = ?3",
+                (&site.name, &site.description, id),
+            )?;
+        } else {
+            conn.execute(
+                "INSERT INTO sites (name, description) VALUES (?1, ?2)",
+                (&site.name, &site.description),
+            )?;
+        }
+        Ok(())
+    }
+
+    pub fn get_sites(&self) -> anyhow::Result<Vec<Site>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare("SELECT id, name, description FROM sites ORDER BY name ASC")?;
+        let rows = stmt.query_map([], |row| {
+            let id: i64 = row.get(0)?;
+            let name: String = row.get(1)?;
+            let description: Option<String> = row.get(2)?;
+            Ok(Site {
+                id: Some(id),
+                name,
+                description,
+            })
+        })?;
+        let mut sites = Vec::new();
+        for row in rows {
+            sites.push(row?);
+        }
+        Ok(sites)
+    }
+
+    pub fn delete_site(&self, id: i64) -> anyhow::Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute("UPDATE connection_profiles SET site_id = NULL WHERE site_id = ?1", [id])?;
+        conn.execute("DELETE FROM sites WHERE id = ?1", [id])?;
+        Ok(())
+    }
+
 
     pub fn save_rule(&self, rule: AlarmRule) -> anyhow::Result<()> {
         let conn = self.conn.lock().unwrap();
@@ -538,9 +631,61 @@ impl DbClient {
         )?;
         Ok(())
     }
+
+    pub fn save_register_config(&self, config: RegisterConfig) -> anyhow::Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "INSERT OR REPLACE INTO register_configs (device_key, address, data_type, multiplier, offset, unit)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            (
+                &config.device_key,
+                config.address as i32,
+                &config.data_type,
+                config.multiplier,
+                config.offset,
+                &config.unit,
+            ),
+        )?;
+        Ok(())
+    }
+
+    pub fn get_register_configs(&self, device_key: &str) -> anyhow::Result<Vec<RegisterConfig>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(
+            "SELECT address, data_type, multiplier, offset, unit 
+             FROM register_configs 
+             WHERE device_key = ?1"
+        )?;
+        let rows = stmt.query_map([device_key], |row| {
+            let address_i32: i32 = row.get(0)?;
+            Ok(RegisterConfig {
+                device_key: device_key.to_string(),
+                address: address_i32 as u16,
+                data_type: row.get(1)?,
+                multiplier: row.get(2)?,
+                offset: row.get(3)?,
+                unit: row.get(4)?,
+            })
+        })?;
+        
+        let mut list = Vec::new();
+        for row in rows {
+            list.push(row?);
+        }
+        Ok(list)
+    }
 }
 
-// Global functions exposed to Dart/Flutter via flutter_rust_bridge
+// // Global functions exposed to Dart/Flutter via flutter_rust_bridge
+pub fn db_save_register_config(db_path: String, config: RegisterConfig) -> anyhow::Result<()> {
+    let client = DbClient::new(&db_path)?;
+    client.save_register_config(config)
+}
+
+pub fn db_get_register_configs(db_path: String, device_key: String) -> anyhow::Result<Vec<RegisterConfig>> {
+    let client = DbClient::new(&db_path)?;
+    client.get_register_configs(&device_key)
+}
 pub fn db_save_profile(db_path: String, profile: ConnectionProfile) -> anyhow::Result<()> {
     let client = DbClient::new(&db_path)?;
     client.save_profile(profile)
@@ -554,6 +699,21 @@ pub fn db_get_profiles(db_path: String) -> anyhow::Result<Vec<ConnectionProfile>
 pub fn db_delete_profile(db_path: String, id: i64) -> anyhow::Result<()> {
     let client = DbClient::new(&db_path)?;
     client.delete_profile(id)
+}
+
+pub fn db_save_site(db_path: String, site: Site) -> anyhow::Result<()> {
+    let client = DbClient::new(&db_path)?;
+    client.save_site(site)
+}
+
+pub fn db_get_sites(db_path: String) -> anyhow::Result<Vec<Site>> {
+    let client = DbClient::new(&db_path)?;
+    client.get_sites()
+}
+
+pub fn db_delete_site(db_path: String, id: i64) -> anyhow::Result<()> {
+    let client = DbClient::new(&db_path)?;
+    client.delete_site(id)
 }
 
 pub fn db_save_rule(db_path: String, rule: AlarmRule) -> anyhow::Result<()> {
@@ -657,6 +817,7 @@ mod tests {
             },
             is_favorite: true,
             last_used: 12345678,
+            site_id: None,
         };
         client.save_profile(tcp_profile).unwrap();
 
@@ -676,6 +837,7 @@ mod tests {
             },
             is_favorite: false,
             last_used: 87654321,
+            site_id: None,
         };
         client.save_profile(serial_profile).unwrap();
 
@@ -697,6 +859,71 @@ mod tests {
         let updated_profiles = client.get_profiles().unwrap();
         assert_eq!(updated_profiles.len(), 1);
         assert_eq!(updated_profiles[0].name, "Test Serial Node");
+
+        // Cleanup
+        let _ = fs::remove_file(db_path);
+    }
+
+    #[test]
+    fn test_site_crud_and_association() {
+        let db_path = "test_modbus_sites.db";
+        let _ = fs::remove_file(db_path);
+
+        let client = DbClient::new(db_path).expect("Failed to create db client");
+
+        // Verify initial sites is empty
+        let initial_sites = client.get_sites().unwrap();
+        assert_eq!(initial_sites.len(), 0);
+
+        // Save site
+        let site = Site {
+            id: None,
+            name: "Facility A".to_string(),
+            description: Some("Main physical plant".to_string()),
+        };
+        client.save_site(site).unwrap();
+
+        // Get site
+        let sites = client.get_sites().unwrap();
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].name, "Facility A");
+        assert_eq!(sites[0].description, Some("Main physical plant".to_string()));
+
+        let site_id = sites[0].id.unwrap();
+
+        // Save profile associated with site
+        let profile = ConnectionProfile {
+            id: None,
+            name: "Associated Node".to_string(),
+            config: ConnectionConfig {
+                protocol_type: "TCP".to_string(),
+                ip: Some("192.168.1.60".to_string()),
+                port: Some(502),
+                port_name: None,
+                baud_rate: None,
+                parity: None,
+                data_bits: None,
+                stop_bits: None,
+            },
+            is_favorite: false,
+            last_used: 99999,
+            site_id: Some(site_id),
+        };
+        client.save_profile(profile).unwrap();
+
+        // Retrieve profile and verify site_id
+        let profiles = client.get_profiles().unwrap();
+        assert_eq!(profiles.len(), 1);
+        assert_eq!(profiles[0].site_id, Some(site_id));
+
+        // Delete site and check profile site_id is set to None
+        client.delete_site(site_id).unwrap();
+        let sites_after = client.get_sites().unwrap();
+        assert_eq!(sites_after.len(), 0);
+
+        let profiles_after = client.get_profiles().unwrap();
+        assert_eq!(profiles_after.len(), 1);
+        assert_eq!(profiles_after[0].site_id, None);
 
         // Cleanup
         let _ = fs::remove_file(db_path);
@@ -756,6 +983,68 @@ mod tests {
         client.clear_alarm_logs().unwrap();
         let logs_after = client.get_alarm_logs().unwrap();
         assert_eq!(logs_after.len(), 0);
+
+        // Cleanup
+        let _ = fs::remove_file(db_path);
+    }
+
+    #[test]
+    fn test_register_configs_crud() {
+        use std::fs;
+        let db_path = "test_modbus_register_configs.db";
+        let _ = fs::remove_file(db_path);
+
+        let client = DbClient::new(db_path).expect("Failed to create db client");
+
+        // Verify initial state is empty
+        let initial = client.get_register_configs("127.0.0.1").unwrap();
+        assert_eq!(initial.len(), 0);
+
+        // Save register configs
+        let config1 = RegisterConfig {
+            device_key: "127.0.0.1".to_string(),
+            address: 40001,
+            data_type: "Float32".to_string(),
+            multiplier: 0.1,
+            offset: -40.0,
+            unit: "C".to_string(),
+        };
+        let config2 = RegisterConfig {
+            device_key: "127.0.0.1".to_string(),
+            address: 40003,
+            data_type: "Uint16".to_string(),
+            multiplier: 1.0,
+            offset: 0.0,
+            unit: "V".to_string(),
+        };
+
+        client.save_register_config(config1.clone()).unwrap();
+        client.save_register_config(config2.clone()).unwrap();
+
+        // Get and verify
+        let list = client.get_register_configs("127.0.0.1").unwrap();
+        assert_eq!(list.len(), 2);
+        
+        let retrieved1 = list.iter().find(|c| c.address == 40001).unwrap();
+        assert_eq!(retrieved1.data_type, "Float32");
+        assert_eq!(retrieved1.multiplier, 0.1);
+        assert_eq!(retrieved1.offset, -40.0);
+        assert_eq!(retrieved1.unit, "C");
+
+        let retrieved2 = list.iter().find(|c| c.address == 40003).unwrap();
+        assert_eq!(retrieved2.data_type, "Uint16");
+
+        // Update config
+        let mut updated = retrieved1.clone();
+        updated.multiplier = 0.5;
+        updated.unit = "F".to_string();
+        client.save_register_config(updated).unwrap();
+
+        // Verify update
+        let list_updated = client.get_register_configs("127.0.0.1").unwrap();
+        let retrieved_updated = list_updated.iter().find(|c| c.address == 40001).unwrap();
+        assert_eq!(retrieved_updated.multiplier, 0.5);
+        assert_eq!(retrieved_updated.unit, "F");
 
         // Cleanup
         let _ = fs::remove_file(db_path);
@@ -913,12 +1202,12 @@ mod tests {
             conn.execute(
                 "INSERT INTO poll_logs (ip_address, address, value, timestamp) 
                  VALUES ('127.0.0.1', 40001, 20, datetime('now', '-10 seconds'))", 
-                []
+                 []
             ).unwrap();
             conn.execute(
                 "INSERT INTO poll_logs (ip_address, address, value, timestamp) 
                  VALUES ('127.0.0.1', 40001, 30, datetime('now', '-2 seconds'))", 
-                []
+                 []
             ).unwrap();
         }
 

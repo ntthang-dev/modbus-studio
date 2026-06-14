@@ -19,7 +19,19 @@ abstract class ModbusClient implements RustOpaqueInterface {
 
   Future<void> disconnect();
 
+  Future<List<bool>> readCoils({required int address, required int quantity});
+
+  Future<List<bool>> readDiscreteInputs({
+    required int address,
+    required int quantity,
+  });
+
   Future<Uint16List> readHoldingRegisters({
+    required int address,
+    required int quantity,
+  });
+
+  Future<Uint16List> readInputRegisters({
     required int address,
     required int quantity,
   });

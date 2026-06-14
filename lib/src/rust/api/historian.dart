@@ -25,10 +25,16 @@ Stream<HistorianData> startHistorianLoop({
   required ConnectionConfig config,
   required int slaveId,
   required String dbPath,
+  required int functionCode,
+  required int startAddress,
+  required int quantity,
 }) => RustLib.instance.api.crateApiHistorianStartHistorianLoop(
   config: config,
   slaveId: slaveId,
   dbPath: dbPath,
+  functionCode: functionCode,
+  startAddress: startAddress,
+  quantity: quantity,
 );
 
 Future<List<HistorianPoint>> getTelemetryLogsByRange({

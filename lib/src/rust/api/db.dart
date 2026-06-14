@@ -7,7 +7,23 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `init_db`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+
+Future<void> dbSaveRegisterConfig({
+  required String dbPath,
+  required RegisterConfig config,
+}) => RustLib.instance.api.crateApiDbDbSaveRegisterConfig(
+  dbPath: dbPath,
+  config: config,
+);
+
+Future<List<RegisterConfig>> dbGetRegisterConfigs({
+  required String dbPath,
+  required String deviceKey,
+}) => RustLib.instance.api.crateApiDbDbGetRegisterConfigs(
+  dbPath: dbPath,
+  deviceKey: deviceKey,
+);
 
 Future<void> dbSaveProfile({
   required String dbPath,
@@ -24,6 +40,17 @@ Future<void> dbDeleteProfile({
   required String dbPath,
   required PlatformInt64 id,
 }) => RustLib.instance.api.crateApiDbDbDeleteProfile(dbPath: dbPath, id: id);
+
+Future<void> dbSaveSite({required String dbPath, required Site site}) =>
+    RustLib.instance.api.crateApiDbDbSaveSite(dbPath: dbPath, site: site);
+
+Future<List<Site>> dbGetSites({required String dbPath}) =>
+    RustLib.instance.api.crateApiDbDbGetSites(dbPath: dbPath);
+
+Future<void> dbDeleteSite({
+  required String dbPath,
+  required PlatformInt64 id,
+}) => RustLib.instance.api.crateApiDbDbDeleteSite(dbPath: dbPath, id: id);
 
 Future<void> dbSaveRule({required String dbPath, required AlarmRule rule}) =>
     RustLib.instance.api.crateApiDbDbSaveRule(dbPath: dbPath, rule: rule);
@@ -100,6 +127,8 @@ abstract class DbClient implements RustOpaqueInterface {
 
   Future<void> deleteScheduledWrite({required PlatformInt64 id});
 
+  Future<void> deleteSite({required PlatformInt64 id});
+
   Future<List<AlarmLog>> getAlarmLogs();
 
   Future<List<AlarmLog>> getAlarmLogsByRange({
@@ -109,9 +138,13 @@ abstract class DbClient implements RustOpaqueInterface {
 
   Future<List<ConnectionProfile>> getProfiles();
 
+  Future<List<RegisterConfig>> getRegisterConfigs({required String deviceKey});
+
   Future<List<AlarmRule>> getRules();
 
   Future<List<ScheduledWrite>> getScheduledWrites();
+
+  Future<List<Site>> getSites();
 
   Future<void> logAlarm({required AlarmLog log});
 
@@ -131,9 +164,13 @@ abstract class DbClient implements RustOpaqueInterface {
 
   Future<void> saveProfile({required ConnectionProfile profile});
 
+  Future<void> saveRegisterConfig({required RegisterConfig config});
+
   Future<void> saveRule({required AlarmRule rule});
 
   Future<void> saveScheduledWrite({required ScheduledWrite write});
+
+  Future<void> saveSite({required Site site});
 }
 
 class AlarmLog {
@@ -275,6 +312,7 @@ class ConnectionProfile {
   final ConnectionConfig config;
   final bool isFavorite;
   final PlatformInt64 lastUsed;
+  final PlatformInt64? siteId;
 
   const ConnectionProfile({
     this.id,
@@ -282,6 +320,7 @@ class ConnectionProfile {
     required this.config,
     required this.isFavorite,
     required this.lastUsed,
+    this.siteId,
   });
 
   @override
@@ -290,7 +329,8 @@ class ConnectionProfile {
       name.hashCode ^
       config.hashCode ^
       isFavorite.hashCode ^
-      lastUsed.hashCode;
+      lastUsed.hashCode ^
+      siteId.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -301,7 +341,47 @@ class ConnectionProfile {
           name == other.name &&
           config == other.config &&
           isFavorite == other.isFavorite &&
-          lastUsed == other.lastUsed;
+          lastUsed == other.lastUsed &&
+          siteId == other.siteId;
+}
+
+class RegisterConfig {
+  final String deviceKey;
+  final int address;
+  final String dataType;
+  final double multiplier;
+  final double offset;
+  final String unit;
+
+  const RegisterConfig({
+    required this.deviceKey,
+    required this.address,
+    required this.dataType,
+    required this.multiplier,
+    required this.offset,
+    required this.unit,
+  });
+
+  @override
+  int get hashCode =>
+      deviceKey.hashCode ^
+      address.hashCode ^
+      dataType.hashCode ^
+      multiplier.hashCode ^
+      offset.hashCode ^
+      unit.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RegisterConfig &&
+          runtimeType == other.runtimeType &&
+          deviceKey == other.deviceKey &&
+          address == other.address &&
+          dataType == other.dataType &&
+          multiplier == other.multiplier &&
+          offset == other.offset &&
+          unit == other.unit;
 }
 
 class ScheduledWrite {
@@ -341,4 +421,24 @@ class ScheduledWrite {
           intervalSecs == other.intervalSecs &&
           isCoil == other.isCoil &&
           isEnabled == other.isEnabled;
+}
+
+class Site {
+  final PlatformInt64? id;
+  final String name;
+  final String? description;
+
+  const Site({this.id, required this.name, this.description});
+
+  @override
+  int get hashCode => id.hashCode ^ name.hashCode ^ description.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Site &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          description == other.description;
 }

@@ -16,6 +16,9 @@ class ConnectionStatus {
   final List<int> registers;
   final bool isWriting;
   final String? writeResult;
+  final int functionCode;
+  final int startAddress;
+  final int quantity;
 
   ConnectionStatus({
     this.activeIp,
@@ -26,6 +29,9 @@ class ConnectionStatus {
     this.registers = const [],
     this.isWriting = false,
     this.writeResult,
+    this.functionCode = 3,
+    this.startAddress = 0,
+    this.quantity = 10,
   });
 
   ConnectionStatus copyWith({
@@ -37,6 +43,9 @@ class ConnectionStatus {
     List<int>? registers,
     bool? isWriting,
     String? writeResult,
+    int? functionCode,
+    int? startAddress,
+    int? quantity,
     bool clearActiveIp = false,
     bool clearActiveConfig = false,
     bool clearError = false,
@@ -51,6 +60,9 @@ class ConnectionStatus {
       registers: registers ?? this.registers,
       isWriting: isWriting ?? this.isWriting,
       writeResult: clearWriteResult ? null : (writeResult ?? this.writeResult),
+      functionCode: functionCode ?? this.functionCode,
+      startAddress: startAddress ?? this.startAddress,
+      quantity: quantity ?? this.quantity,
     );
   }
 }
@@ -100,11 +112,17 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
         clearError: true,
       );
 
+      // Load register configs for this device key
+      await ref.read(registerConfigProvider.notifier).loadConfigs(deviceKey);
+
       // 2. Start the historian stream loop
       final stream = startHistorianLoop(
         config: config,
         slaveId: slaveId,
         dbPath: "historian.db",
+        functionCode: state.functionCode,
+        startAddress: state.startAddress,
+        quantity: state.quantity,
       );
 
       _historianSubscription = stream.listen(
@@ -194,9 +212,88 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
       rethrow;
     }
   }
+
+  void updatePollConfig(int functionCode, int startAddress, int quantity) {
+    if (!state.isConnected) return;
+    
+    state = state.copyWith(
+      functionCode: functionCode,
+      startAddress: startAddress,
+      quantity: quantity,
+      registers: const [],
+    );
+
+    _historianSubscription?.cancel();
+    _historianSubscription = null;
+
+    final config = state.activeConfig!;
+    final slaveId = 1;
+
+    final stream = startHistorianLoop(
+      config: config,
+      slaveId: slaveId,
+      dbPath: "historian.db",
+      functionCode: functionCode,
+      startAddress: startAddress,
+      quantity: quantity,
+    );
+
+    _historianSubscription = stream.listen(
+      (HistorianData data) {
+        if (data.error != null) {
+          state = state.copyWith(error: "Historian: ${data.error}");
+        } else {
+          state = state.copyWith(
+            registers: data.registers.toList(),
+            clearError: true,
+          );
+          ref.read(alarmProvider.notifier).evaluateRegisters(data.registers);
+        }
+      },
+      onError: (err) {
+        state = state.copyWith(error: "Stream error: $err");
+      },
+    );
+  }
 }
 
 final connectionProvider =
     NotifierProvider<ConnectionNotifier, ConnectionStatus>(() {
   return ConnectionNotifier();
+});
+
+class RegisterConfigNotifier extends Notifier<Map<int, RegisterConfig>> {
+  @override
+  Map<int, RegisterConfig> build() {
+    return const {};
+  }
+
+  Future<void> loadConfigs(String deviceKey) async {
+    try {
+      final list = await dbGetRegisterConfigs(dbPath: "historian.db", deviceKey: deviceKey);
+      final map = <int, RegisterConfig>{};
+      for (final cfg in list) {
+        map[cfg.address] = cfg;
+      }
+      state = map;
+    } catch (e) {
+      debugPrint("Error loading register configs: $e");
+    }
+  }
+
+  Future<void> saveConfig(RegisterConfig config) async {
+    try {
+      await dbSaveRegisterConfig(dbPath: "historian.db", config: config);
+      final map = Map<int, RegisterConfig>.from(state);
+      map[config.address] = config;
+      state = map;
+    } catch (e) {
+      debugPrint("Error saving register config: $e");
+    }
+  }
+}
+
+final registerConfigProvider =
+    NotifierProvider<RegisterConfigNotifier, Map<int, RegisterConfig>>(() {
+  return RegisterConfigNotifier();
 });

@@ -70,7 +70,14 @@ class DeviceInspectorScreen extends HookConsumerWidget {
           updateState(state.value.copyWith(isConnecting: false, isConnected: true, clearError: true));
           
           // 2. Start the Active Rust Historian for polling and logging
-          final stream = startHistorianLoop(config: config, slaveId: 1, dbPath: "historian.db");
+          final stream = startHistorianLoop(
+            config: config,
+            slaveId: 1,
+            dbPath: "historian.db",
+            functionCode: 3,
+            startAddress: 0,
+            quantity: 10,
+          );
           historianSub = stream.listen((HistorianData data) {
             if (data.error != null) {
               updateState(state.value.copyWith(error: "Historian Error: ${data.error}"));
