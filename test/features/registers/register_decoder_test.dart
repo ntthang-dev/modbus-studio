@@ -44,5 +44,44 @@ void main() {
         '-30 C',
       );
     });
+
+    test('Decodes String type', () {
+      // "Mo" -> 19823, "db" -> 25698, "us" -> 30067, Null -> 0
+      expect(RegisterDecoder.format(rawRegisters: [19823, 25698, 30067, 0], startIndex: 0, dataType: 'String'), 'Modbus');
+    });
+
+    test('Decodes Bitfield type', () {
+      expect(RegisterDecoder.format(rawRegisters: [9], startIndex: 0, dataType: 'Bitfield'), '0,3');
+      expect(RegisterDecoder.format(rawRegisters: [0], startIndex: 0, dataType: 'Bitfield'), 'None');
+    });
+
+    test('Decodes Enum type', () {
+      expect(
+        RegisterDecoder.format(
+          rawRegisters: [1],
+          startIndex: 0,
+          dataType: 'Enum',
+          unit: '0:Stopped,1:Running,2:Fault',
+        ),
+        'Running',
+      );
+      expect(
+        RegisterDecoder.format(
+          rawRegisters: [5],
+          startIndex: 0,
+          dataType: 'Enum',
+          unit: '0:Stopped,1:Running,2:Fault',
+        ),
+        '5',
+      );
+    });
+
+    test('Decodes DateTime type', () {
+      final dtStr32 = RegisterDecoder.format(rawRegisters: [27107, 40960], startIndex: 0, dataType: 'DateTime32');
+      expect(dtStr32.contains('2026-04-'), isTrue);
+
+      final dtStr64 = RegisterDecoder.format(rawRegisters: [0, 413, 37342, 61440], startIndex: 0, dataType: 'DateTime64');
+      expect(dtStr64.contains('2026-04-'), isTrue);
+    });
   });
 }
