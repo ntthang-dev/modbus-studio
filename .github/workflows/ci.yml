@@ -93,4 +93,9 @@ jobs:
         run: flutter pub get
 
       - name: Build macOS App Bundle
-        run: flutter build macos --no-codesign
+        run: flutter build macos --release
+        env:
+          CODE_SIGN_IDENTITY: ""
+          CODE_SIGNING_REQUIRED: "NO"
+          CODE_SIGNING_ALLOWED: "NO"
+
