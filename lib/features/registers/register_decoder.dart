@@ -174,4 +174,87 @@ class RegisterDecoder {
     }
     return formattedVal;
   }
+
+  /// Decodes raw Modbus 16-bit registers into a double value (if numeric/boolean).
+  /// Returns null if the dataType cannot be represented as a double (e.g. String).
+  static double? decodeToDouble({
+    required List<int> rawRegisters,
+    required int startIndex,
+    required String dataType,
+    bool swapWords = false,
+    double multiplier = 1.0,
+    double offset = 0.0,
+  }) {
+    if (rawRegisters.isEmpty || startIndex < 0 || startIndex >= rawRegisters.length) {
+      return null;
+    }
+    final rawVal = rawRegisters[startIndex];
+
+    if (dataType == 'Boolean') {
+      return rawVal == 1 ? 1.0 : 0.0;
+    }
+    if (dataType == 'Binary' || dataType == 'Hex' || dataType == 'Bitfield' || dataType == 'Enum') {
+      return rawVal.toDouble();
+    }
+    if (dataType == 'DateTime32' || dataType == 'DateTime64') {
+      final is64 = dataType == 'DateTime64';
+      final requiredRegs = is64 ? 4 : 2;
+      if (startIndex + requiredRegs > rawRegisters.length) {
+        return null;
+      }
+      if (is64) {
+        final w1 = rawRegisters[startIndex];
+        final w2 = rawRegisters[startIndex + 1];
+        final w3 = rawRegisters[startIndex + 2];
+        final w4 = rawRegisters[startIndex + 3];
+        final byteData = ByteData(8);
+        byteData.setUint16(0, w1, Endian.big);
+        byteData.setUint16(2, w2, Endian.big);
+        byteData.setUint16(4, w3, Endian.big);
+        byteData.setUint16(6, w4, Endian.big);
+        return byteData.getUint64(0, Endian.big).toDouble();
+      } else {
+        final w1 = rawRegisters[startIndex];
+        final w2 = rawRegisters[startIndex + 1];
+        final byteData = ByteData(4);
+        byteData.setUint16(0, w1, Endian.big);
+        byteData.setUint16(2, w2, Endian.big);
+        return byteData.getUint32(0, Endian.big).toDouble();
+      }
+    }
+    if (dataType == 'String') {
+      return null;
+    }
+
+    double value = 0.0;
+    bool is32Bit = dataType == 'Int32' || dataType == 'Uint32' || dataType == 'Float32';
+    if (is32Bit) {
+      if (startIndex + 1 >= rawRegisters.length) {
+        return null;
+      }
+      final w1 = rawRegisters[startIndex];
+      final w2 = rawRegisters[startIndex + 1];
+      final word1 = swapWords ? w2 : w1;
+      final word2 = swapWords ? w1 : w2;
+      final byteData = ByteData(4);
+      byteData.setUint16(0, word1, Endian.big);
+      byteData.setUint16(2, word2, Endian.big);
+
+      if (dataType == 'Float32') {
+        value = byteData.getFloat32(0, Endian.big);
+      } else if (dataType == 'Int32') {
+        value = byteData.getInt32(0, Endian.big).toDouble();
+      } else if (dataType == 'Uint32') {
+        value = byteData.getUint32(0, Endian.big).toDouble();
+      }
+    } else {
+      if (dataType == 'Int16') {
+        final signedVal = rawVal > 32767 ? rawVal - 65536 : rawVal;
+        value = signedVal.toDouble();
+      } else {
+        value = rawVal.toDouble();
+      }
+    }
+    return value * multiplier + offset;
+  }
 }
