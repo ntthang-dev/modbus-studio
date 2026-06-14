@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter/hooks.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter/services.dart';
 import 'package:modbus_studio/providers/ui_provider.dart';
 import 'package:modbus_studio/providers/radar_provider.dart';

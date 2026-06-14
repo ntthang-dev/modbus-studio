@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modbus_studio/src/rust/api/scanner.dart';
 import 'package:modbus_studio/src/rust/api/client.dart';
+import 'package:modbus_studio/src/rust/api/db.dart';
 
 class ScannedDevice {
   final String ip;
