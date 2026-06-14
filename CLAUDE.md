@@ -1,7 +1,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **modbus-studio** (2060 symbols, 3653 relationships, 113 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **modbus-studio** (2069 symbols, 3664 relationships, 114 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > Index stale? Run `node .gitnexus/run.cjs analyze` from the project root — it auto-selects an available runner. No `.gitnexus/run.cjs` yet? `npx gitnexus analyze` (npm 11 crash → `npm i -g gitnexus`; #1939).
 
@@ -67,4 +67,3 @@ This project is indexed by GitNexus as **modbus-studio** (2060 symbols, 3653 rel
 - **UI System**: Cupertino widgets (Liquid Control Deck philosophy). Use Riverpod providers and Flutter hooks (`flutter_riverpod`, `hooks_riverpod`, `flutter_hooks`) for reactive state.
 - **Boundary Validation**: Always sanitize and validate untrusted parameters at FFI/Scripting borders (e.g. register address bounds `1–65535`, word values `0–65535`, report paths to prevent traversal).
 - **Static Analysis**: Exclude third-party cargokit directory (`rust_builder/cargokit/**`) inside `analysis_options.yaml`.
-
