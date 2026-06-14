@@ -10,6 +10,7 @@ import 'package:modbus_studio/features/inspector/widgets/write_control_card.dart
 import 'package:modbus_studio/features/inspector/widgets/historian_chart.dart';
 import 'package:modbus_studio/features/registers/register_decoder.dart';
 import 'package:modbus_studio/src/rust/api/db.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class RegisterExplorerScreen extends HookConsumerWidget {
   const RegisterExplorerScreen({super.key});
@@ -28,6 +29,22 @@ class RegisterExplorerScreen extends HookConsumerWidget {
     final selectedFC = useState<int>(connState.functionCode);
     final startAddressController = useTextEditingController(text: connState.startAddress.toString());
     final quantityController = useTextEditingController(text: connState.quantity.toString());
+
+    final showActiveOnly = useState<bool>(true);
+
+    final activeIndices = <int>[];
+    for (int i = 0; i < connState.registers.length; i++) {
+      if (connState.registers[i] != 0) {
+        activeIndices.add(i);
+      }
+    }
+
+    final displayIndices = showActiveOnly.value
+        ? activeIndices
+        : List<int>.generate(
+            connState.registers.isNotEmpty ? connState.registers.length : connState.quantity,
+            (i) => i,
+          );
 
     if (!connState.isConnected) {
       return Center(
@@ -97,19 +114,63 @@ class RegisterExplorerScreen extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(CupertinoIcons.settings_solid, color: CupertinoColors.systemTeal, size: 16),
-                    SizedBox(width: 8),
-                    Text(
-                      'MODBUS POLL CONTEXT',
-                      style: TextStyle(
-                        fontSize: 11, 
-                        fontWeight: FontWeight.bold, 
-                        color: CupertinoColors.systemGrey2,
-                        letterSpacing: 1.2,
-                        fontFamily: 'SF Mono',
-                      ),
+                    const Row(
+                      children: [
+                        Icon(CupertinoIcons.settings_solid, color: CupertinoColors.systemTeal, size: 16),
+                        SizedBox(width: 8),
+                        Text(
+                          'MODBUS POLL CONTEXT',
+                          style: TextStyle(
+                            fontSize: 11, 
+                            fontWeight: FontWeight.bold, 
+                            color: CupertinoColors.systemGrey2,
+                            letterSpacing: 1.2,
+                            fontFamily: 'SF Mono',
+                          ),
+                        ),
+                      ],
+                    ),
+                    CupertinoSlidingSegmentedControl<bool>(
+                      groupValue: showActiveOnly.value,
+                      backgroundColor: const Color(0xFF1E1E26),
+                      thumbColor: CupertinoColors.systemTeal,
+                      children: {
+                        true: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            'Active Only',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: showActiveOnly.value ? CupertinoColors.black : CupertinoColors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        false: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            'Manual Range',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: !showActiveOnly.value ? CupertinoColors.black : CupertinoColors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      },
+                      onValueChanged: (val) {
+                        if (val != null) {
+                          showActiveOnly.value = val;
+                          if (val) {
+                            startAddressController.text = '0';
+                            quantityController.text = '100';
+                            connNotifier.updatePollConfig(selectedFC.value, 0, 100);
+                          }
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -212,12 +273,17 @@ class RegisterExplorerScreen extends HookConsumerWidget {
                           const SizedBox(height: 4),
                           CupertinoTextField(
                             controller: startAddressController,
+                            enabled: !showActiveOnly.value,
                             keyboardType: TextInputType.number,
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                             placeholder: '0',
-                            style: const TextStyle(color: CupertinoColors.white, fontSize: 13, fontFamily: 'SF Mono'),
+                            style: TextStyle(
+                              color: showActiveOnly.value ? CupertinoColors.systemGrey : CupertinoColors.white, 
+                              fontSize: 13, 
+                              fontFamily: 'SF Mono'
+                            ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E1E26),
+                              color: showActiveOnly.value ? const Color(0xFF141419) : const Color(0xFF1E1E26),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: const Color(0xFF2C2C38), width: 1.0),
                             ),
@@ -237,12 +303,17 @@ class RegisterExplorerScreen extends HookConsumerWidget {
                           const SizedBox(height: 4),
                           CupertinoTextField(
                             controller: quantityController,
+                            enabled: !showActiveOnly.value,
                             keyboardType: TextInputType.number,
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                             placeholder: '10',
-                            style: const TextStyle(color: CupertinoColors.white, fontSize: 13, fontFamily: 'SF Mono'),
+                            style: TextStyle(
+                              color: showActiveOnly.value ? CupertinoColors.systemGrey : CupertinoColors.white, 
+                              fontSize: 13, 
+                              fontFamily: 'SF Mono'
+                            ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E1E26),
+                              color: showActiveOnly.value ? const Color(0xFF141419) : const Color(0xFF1E1E26),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: const Color(0xFF2C2C38), width: 1.0),
                             ),
@@ -259,9 +330,9 @@ class RegisterExplorerScreen extends HookConsumerWidget {
                         const SizedBox(height: 4),
                         CupertinoButton(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          color: CupertinoColors.systemTeal,
+                          color: showActiveOnly.value ? CupertinoColors.systemGrey.withValues(alpha: 0.2) : CupertinoColors.systemTeal,
                           borderRadius: BorderRadius.circular(8),
-                          onPressed: () {
+                          onPressed: showActiveOnly.value ? null : () {
                             final startAddr = int.tryParse(startAddressController.text) ?? 0;
                             final quantity = int.tryParse(quantityController.text) ?? 10;
                             // Clamp quantity to sane limits to prevent crashing devices
@@ -270,9 +341,13 @@ class RegisterExplorerScreen extends HookConsumerWidget {
 
                             connNotifier.updatePollConfig(selectedFC.value, startAddr, safeQty);
                           },
-                          child: const Text(
+                          child: Text(
                             'Poll',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: CupertinoColors.black),
+                            style: TextStyle(
+                              fontSize: 13, 
+                              fontWeight: FontWeight.bold, 
+                              color: showActiveOnly.value ? CupertinoColors.systemGrey : CupertinoColors.black
+                            ),
                           ),
                         ),
                       ],
@@ -284,55 +359,103 @@ class RegisterExplorerScreen extends HookConsumerWidget {
           ),
         ),
 
-        // Registers grid
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          sliver: SliverGrid(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1.8,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+        if (displayIndices.isEmpty)
+          SliverToBoxAdapter(
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: const Color(0xFF13131A),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF1E1E28)),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    CupertinoIcons.info_circle,
+                    size: 48,
+                    color: CupertinoColors.systemGrey.withValues(alpha: 0.6),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No Active Registers Detected',
+                    style: TextStyle(
+                      color: CupertinoColors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'All registers in the auto-scan range returned zero. Try writing values, changing the function code, or switching to Manual Range.',
+                    style: TextStyle(color: CupertinoColors.systemGrey2, fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  CupertinoButton(
+                    color: CupertinoColors.systemTeal,
+                    sizeStyle: CupertinoButtonSize.small,
+                    onPressed: () {
+                      showActiveOnly.value = false;
+                    },
+                    child: const Text('Switch to Manual Range', style: TextStyle(color: CupertinoColors.black, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
             ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final isSelected = selectedRegisterIndex.value == index;
-                final value = index < connState.registers.length ? connState.registers[index] : 0;
-                final address = addressPrefix + connState.startAddress + index;
-                final tag = libraryState.activeTags[address];
-                final config = registerConfigs[address];
+          )
+        else
+          // Registers grid
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 2.2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final actualIndex = displayIndices[index];
+                  final isSelected = selectedRegisterIndex.value == actualIndex;
+                  final value = actualIndex < connState.registers.length ? connState.registers[actualIndex] : 0;
+                  final address = addressPrefix + connState.startAddress + actualIndex;
+                  final tag = libraryState.activeTags[address];
+                  final config = registerConfigs[address];
 
-                // Decode display value
-                final defaultType = (connState.functionCode == 1 || connState.functionCode == 2) ? 'Boolean' : 'Uint16';
-                final decodedText = RegisterDecoder.format(
-                  rawRegisters: connState.registers,
-                  startIndex: index,
-                  dataType: config?.dataType ?? defaultType,
-                  multiplier: config?.multiplier ?? 1.0,
-                  offset: config?.offset ?? 0.0,
-                  unit: config?.unit ?? '',
-                );
-                
-                return _buildRegisterTile(
-                  context,
-                  ref,
-                  connState.activeIp ?? '',
-                  index: index,
-                  address: address,
-                  rawValue: value,
-                  decodedValue: decodedText,
-                  tag: tag,
-                  isSelected: isSelected,
-                  config: config,
-                  onTap: () {
-                    selectedRegisterIndex.value = index;
-                  },
-                );
-              },
-              childCount: connState.registers.isNotEmpty ? connState.registers.length : connState.quantity,
+                  // Decode display value
+                  final defaultType = (connState.functionCode == 1 || connState.functionCode == 2) ? 'Boolean' : 'Uint16';
+                  final decodedText = RegisterDecoder.format(
+                    rawRegisters: connState.registers,
+                    startIndex: actualIndex,
+                    dataType: config?.dataType ?? defaultType,
+                    multiplier: config?.multiplier ?? 1.0,
+                    offset: config?.offset ?? 0.0,
+                    unit: config?.unit ?? '',
+                  );
+                  
+                  return _buildRegisterTile(
+                    context,
+                    ref,
+                    connState.activeIp ?? '',
+                    index: actualIndex,
+                    address: address,
+                    rawValue: value,
+                    decodedValue: decodedText,
+                    tag: tag,
+                    isSelected: isSelected,
+                    config: config,
+                    onTap: () {
+                      selectedRegisterIndex.value = actualIndex;
+                    },
+                  );
+                },
+                childCount: displayIndices.length,
+              ),
             ),
           ),
-        ),
 
         // Historian Chart and Write controls section for selected register
         SliverToBoxAdapter(
@@ -360,6 +483,44 @@ class RegisterExplorerScreen extends HookConsumerWidget {
     );
   }
 
+  Widget _buildSparkline(List<double> values) {
+    if (values.length < 2) {
+      return const SizedBox(width: 50, height: 20);
+    }
+    
+    final spots = <FlSpot>[];
+    for (int i = 0; i < values.length; i++) {
+      spots.add(FlSpot(i.toDouble(), values[i]));
+    }
+
+    return SizedBox(
+      width: 60,
+      height: 20,
+      child: LineChart(
+        LineChartData(
+          gridData: const FlGridData(show: false),
+          titlesData: const FlTitlesData(show: false),
+          borderData: const FlBorderData(show: false),
+          lineTouchData: const LineTouchData(enabled: false),
+          lineBarsData: [
+            LineChartBarData(
+              spots: spots,
+              isCurved: true,
+              color: CupertinoColors.systemTeal.withValues(alpha: 0.8),
+              barWidth: 1.5,
+              isStrokeCapRound: true,
+              dotData: const FlDotData(show: false),
+              belowBarData: BarAreaData(
+                show: true,
+                color: CupertinoColors.systemTeal.withValues(alpha: 0.1),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildRegisterTile(
     BuildContext context,
     WidgetRef ref,
@@ -374,6 +535,8 @@ class RegisterExplorerScreen extends HookConsumerWidget {
     required VoidCallback onTap,
   }) {
     final hexString = '0x${rawValue.toRadixString(16).toUpperCase().padLeft(4, '0')}';
+    final sparklineData = ref.watch(sparklineProvider);
+    final values = sparklineData[address] ?? const [];
     
     return CupertinoButton(
       padding: EdgeInsets.zero,
@@ -391,7 +554,7 @@ class RegisterExplorerScreen extends HookConsumerWidget {
           ),
           borderRadius: BorderRadius.circular(12),
         ),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -405,7 +568,7 @@ class RegisterExplorerScreen extends HookConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: isSelected ? CupertinoColors.white : CupertinoColors.systemGrey2, 
-                      fontSize: 12, 
+                      fontSize: 11, 
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal
                     ),
                   ),
@@ -418,14 +581,14 @@ class RegisterExplorerScreen extends HookConsumerWidget {
                     padding: const EdgeInsets.all(4),
                     child: Icon(
                       CupertinoIcons.slider_horizontal_3,
-                      size: 14,
+                      size: 13,
                       color: isSelected ? cupertinoTealAccent : CupertinoColors.systemGrey2,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -433,7 +596,7 @@ class RegisterExplorerScreen extends HookConsumerWidget {
                   child: Text(
                     decodedValue,
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'SF Mono',
                       color: isSelected ? CupertinoColors.white : CupertinoColors.systemTeal,
@@ -441,6 +604,10 @@ class RegisterExplorerScreen extends HookConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                if (values.isNotEmpty) ...[
+                  _buildSparkline(values),
+                  const SizedBox(width: 6),
+                ],
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -449,13 +616,13 @@ class RegisterExplorerScreen extends HookConsumerWidget {
                       style: const TextStyle(
                         fontFamily: 'SF Mono',
                         color: CupertinoColors.systemGrey,
-                        fontSize: 10,
+                        fontSize: 9,
                       ),
                     ),
                     Text(
                       config?.dataType ?? 'Uint16',
                       style: const TextStyle(
-                        fontSize: 9,
+                        fontSize: 8,
                         color: CupertinoColors.systemGrey2,
                       ),
                     ),
@@ -539,6 +706,11 @@ class _RegisterConfigDialog extends HookConsumerWidget {
                       'Float32',
                       'Hex',
                       'Binary',
+                      'String',
+                      'Bitfield',
+                      'Enum',
+                      'DateTime32',
+                      'DateTime64',
                     ].map((type) {
                       return CupertinoActionSheetAction(
                         onPressed: () {
@@ -637,6 +809,46 @@ class _RegisterConfigDialog extends HookConsumerWidget {
                 ),
               ),
             ],
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF141419),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: const Color(0xFF2C2C38)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'HELP & CONFIGURATION GUIDE',
+                    style: TextStyle(
+                      fontSize: 9, 
+                      fontWeight: FontWeight.bold, 
+                      color: CupertinoColors.systemTeal,
+                      fontFamily: 'SF Mono',
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    '• Linear Scaling: Applied as y = mx + c. Multiplier (m) scales the value, Offset (c) shifts it. Example: m=0.1, c=-40.0 scales 1000 to 60.0.',
+                    style: TextStyle(fontSize: 10, color: CupertinoColors.systemGrey2),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    '• Enum Type: Enter comma-separated key:value pairs in the Unit field. Example: 0:Stopped,1:Running,2:Fault.',
+                    style: TextStyle(fontSize: 10, color: CupertinoColors.systemGrey2),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(height: 1, color: const Color(0xFF2C2C38)),
+                  const SizedBox(height: 6),
+                  const Text(
+                    '© 2026 ntthang-dev (ぞたの). All rights reserved. Registered Modbus SCADA Engine.',
+                    style: TextStyle(fontSize: 9, fontStyle: FontStyle.italic, color: CupertinoColors.systemGrey),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
