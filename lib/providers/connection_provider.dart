@@ -5,6 +5,7 @@ import 'package:modbus_studio/src/rust/api/client.dart';
 import 'package:modbus_studio/src/rust/api/historian.dart';
 import 'package:modbus_studio/src/rust/api/db.dart';
 import 'package:modbus_studio/features/alarms/alarm_provider.dart';
+import 'package:modbus_studio/features/registers/register_decoder.dart';
 
 
 class ConnectionStatus {
@@ -89,6 +90,7 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
       debugPrint("Error disconnecting client during cleanup: $e");
     }
     _client = null;
+    ref.read(sparklineProvider.notifier).clear();
   }
 
   Future<void> connect(ConnectionConfig config, {int slaveId = 1}) async {
@@ -135,6 +137,33 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
               clearError: true,
             );
             ref.read(alarmProvider.notifier).evaluateRegisters(data.registers);
+            final configs = ref.read(registerConfigProvider);
+            final defaultType = (state.functionCode == 1 || state.functionCode == 2) ? 'Boolean' : 'Uint16';
+            final addressPrefix = switch (state.functionCode) {
+              1 => 1,
+              2 => 10001,
+              3 => 40001,
+              4 => 30001,
+              _ => 40001,
+            };
+            final newValues = <int, double>{};
+            for (int i = 0; i < data.registers.length; i++) {
+              final address = addressPrefix + state.startAddress + i;
+              final config = configs[address];
+              final doubleVal = RegisterDecoder.decodeToDouble(
+                rawRegisters: data.registers.toList(),
+                startIndex: i,
+                dataType: config?.dataType ?? defaultType,
+                multiplier: config?.multiplier ?? 1.0,
+                offset: config?.offset ?? 0.0,
+              );
+              if (doubleVal != null) {
+                newValues[address] = doubleVal;
+              }
+            }
+            if (newValues.isNotEmpty) {
+              ref.read(sparklineProvider.notifier).addValues(newValues);
+            }
           }
         },
         onError: (err) {
@@ -248,6 +277,33 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
             clearError: true,
           );
           ref.read(alarmProvider.notifier).evaluateRegisters(data.registers);
+          final configs = ref.read(registerConfigProvider);
+          final defaultType = (state.functionCode == 1 || state.functionCode == 2) ? 'Boolean' : 'Uint16';
+          final addressPrefix = switch (state.functionCode) {
+            1 => 1,
+            2 => 10001,
+            3 => 40001,
+            4 => 30001,
+            _ => 40001,
+          };
+          final newValues = <int, double>{};
+          for (int i = 0; i < data.registers.length; i++) {
+            final address = addressPrefix + state.startAddress + i;
+            final config = configs[address];
+            final doubleVal = RegisterDecoder.decodeToDouble(
+              rawRegisters: data.registers.toList(),
+              startIndex: i,
+              dataType: config?.dataType ?? defaultType,
+              multiplier: config?.multiplier ?? 1.0,
+              offset: config?.offset ?? 0.0,
+            );
+            if (doubleVal != null) {
+              newValues[address] = doubleVal;
+            }
+          }
+          if (newValues.isNotEmpty) {
+            ref.read(sparklineProvider.notifier).addValues(newValues);
+          }
         }
       },
       onError: (err) {
@@ -296,4 +352,33 @@ class RegisterConfigNotifier extends Notifier<Map<int, RegisterConfig>> {
 final registerConfigProvider =
     NotifierProvider<RegisterConfigNotifier, Map<int, RegisterConfig>>(() {
   return RegisterConfigNotifier();
+});
+
+class SparklineNotifier extends Notifier<Map<int, List<double>>> {
+  @override
+  Map<int, List<double>> build() {
+    return const {};
+  }
+
+  void addValues(Map<int, double> newValues) {
+    final next = Map<int, List<double>>.from(state);
+    newValues.forEach((address, value) {
+      final list = List<double>.from(next[address] ?? []);
+      list.add(value);
+      if (list.length > 25) {
+        list.removeAt(0);
+      }
+      next[address] = list;
+    });
+    state = next;
+  }
+
+  void clear() {
+    state = const {};
+  }
+}
+
+final sparklineProvider =
+    NotifierProvider<SparklineNotifier, Map<int, List<double>>>(() {
+  return SparklineNotifier();
 });
