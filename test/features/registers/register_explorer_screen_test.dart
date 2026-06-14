@@ -101,4 +101,45 @@ void main() {
 
     await tester.pump(const Duration(seconds: 1));
   });
+
+  testWidgets('RegisterExplorerScreen renders Auto-Scan segment control and filters inactive registers', (tester) async {
+    final mockStatus = ConnectionStatus(
+      isConnected: true,
+      activeIp: '192.168.1.10',
+      activeConfig: const ConnectionConfig(
+        protocolType: 'TCP',
+        ip: '192.168.1.10',
+        port: 502,
+      ),
+      registers: [11, 0, 33, 0],
+      functionCode: 3,
+      startAddress: 0,
+      quantity: 4,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          connectionProvider.overrideWith(() => MockConnectionNotifier(mockStatus)),
+        ],
+        child: const CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: RegisterExplorerScreen(),
+          ),
+        ),
+      ),
+    );
+
+    // Verify segmented control items exist
+    expect(find.text('Active Only'), findsOneWidget);
+    expect(find.text('Manual Range'), findsOneWidget);
+
+    // By default, Active Only is true, so only non-zero registers 40001 and 40003 are shown
+    expect(find.text('Reg 40001'), findsOneWidget);
+    expect(find.text('Reg 40003'), findsOneWidget);
+    expect(find.text('Reg 40002'), findsNothing);
+    expect(find.text('Reg 40004'), findsNothing);
+
+    await tester.pump(const Duration(seconds: 1));
+  });
 }
