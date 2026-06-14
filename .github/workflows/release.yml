@@ -104,7 +104,8 @@ jobs:
       - name: Package macOS .app Zip
         run: |
           cd build/macos/Build/Products/Release
-          zip -r -y ../../../../modbus_studio_mac.zip modbus_studio.app
+          zip -r -y "$GITHUB_WORKSPACE/modbus_studio_mac.zip" modbus_studio.app
+
 
       - name: Package macOS .dmg
         run: |
