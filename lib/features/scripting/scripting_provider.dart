@@ -5,6 +5,10 @@ import 'package:flutter_js/flutter_js.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modbus_studio/providers/connection_provider.dart';
 import 'package:modbus_studio/features/alarms/alarm_provider.dart';
+import 'package:modbus_studio/providers/settings_provider.dart';
+import 'package:modbus_studio/features/reports/pdf_report_helper.dart';
+import 'package:modbus_studio/src/rust/api/db.dart';
+import 'package:modbus_studio/src/rust/api/historian.dart';
 
 class ScriptingState {
   final String code;
@@ -97,6 +101,19 @@ class ScriptingNotifier extends Notifier<ScriptingState> {
         }
       });
 
+      // Expose exportReport bridge channel
+      runtime.onMessage('exportReport', (dynamic args) async {
+        try {
+          final data = json.decode(args.toString()) as Map<String, dynamic>;
+          final format = (data['format'] ?? 'pdf').toString().toLowerCase();
+          final rangeHours = (data['rangeHours'] ?? 24) as int;
+          
+          await exportReportHeadless(format: format, rangeHours: rangeHours);
+        } catch (e) {
+          _log("JS Error exportReport callback: $e");
+        }
+      });
+
       _jsRuntime = runtime;
     } catch (e) {
       debugPrint("Failed to initialize Javascript runtime: $e");
@@ -138,6 +155,9 @@ class ScriptingNotifier extends Notifier<ScriptingState> {
         ref.read(alarmProvider.notifier).logCustomAlarm("Boiler Hot!", "Critical");
         _log("JS Custom Alarm (Mock): [Critical] Boiler Hot!");
       }
+      if (state.code.contains('exportReport')) {
+        _log("JS Report Exporter (Mock): Auto-exported successfully.");
+      }
       _log("Script executed successfully (Mock).");
       return;
     }
@@ -168,6 +188,9 @@ class ScriptingNotifier extends Notifier<ScriptingState> {
       },
       logAlarm: function(msg, sev) {
         sendMessage('logAlarm', JSON.stringify({message: msg, severity: sev}));
+      },
+      exportReport: function(format, hours) {
+        sendMessage('exportReport', JSON.stringify({format: format, rangeHours: hours}));
       }
     };
     ''';
@@ -188,6 +211,81 @@ class ScriptingNotifier extends Notifier<ScriptingState> {
       state = state.copyWith(runtimeError: e.toString());
       _log("JS Execution Exception: $e");
     }
+  }
+
+  Future<void> exportReportHeadless({required String format, required int rangeHours}) async {
+    try {
+      const dbPath = "historian.db";
+      final connState = ref.read(connectionProvider);
+      
+      final deviceName = connState.activeConfig?.ip ?? connState.activeConfig?.portName ?? 'Mock Node';
+      final protocolType = connState.activeConfig?.protocolType ?? 'TCP';
+      
+      final end = DateTime.now();
+      final start = end.subtract(Duration(hours: rangeHours));
+      
+      final telemetry = await getTelemetryLogsByRange(
+        dbPath: dbPath,
+        startTs: start.millisecondsSinceEpoch,
+        endTs: end.millisecondsSinceEpoch,
+      );
+      
+      final alarms = await dbGetAlarmLogsByRange(
+        dbPath: dbPath,
+        startTs: start.millisecondsSinceEpoch,
+        endTs: end.millisecondsSinceEpoch,
+      );
+      
+      final documentsDir = Directory('${Platform.environment['HOME']}/Documents/ModbusStudio/Reports');
+      if (!await documentsDir.exists()) {
+        await documentsDir.create(recursive: true);
+      }
+      
+      final timestamp = end.toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
+      final fileName = 'report_$timestamp.$format';
+      final file = File('${documentsDir.path}/$fileName');
+      
+      if (format == 'pdf') {
+        final pdf = await PdfReportHelper.generateHistoricalReport(
+          deviceName: deviceName,
+          protocolType: protocolType,
+          telemetryPoints: telemetry,
+          alarmLogs: alarms,
+          startRange: start,
+          endRange: end,
+        );
+        await file.writeAsBytes(await pdf.save());
+      } else {
+        final csv = _generateCsvString(telemetry, alarms);
+        await file.writeAsString(csv);
+      }
+      
+      _log("Report auto-exported successfully to: $fileName");
+    } catch (e) {
+      _log("Auto-export report failed: $e");
+    }
+  }
+
+  String _generateCsvString(List<HistorianPoint> telemetry, List<AlarmLog> alarms) {
+    final buffer = StringBuffer();
+    
+    buffer.writeln("=== TELEMETRY LOGS ===");
+    buffer.writeln("Timestamp,Register Address,Value");
+    for (final p in telemetry) {
+      final dt = DateTime.fromMillisecondsSinceEpoch(p.timestampMs.toInt());
+      buffer.writeln("${dt.toIso8601String()},${p.address},${p.value}");
+    }
+    
+    buffer.writeln();
+    
+    buffer.writeln("=== ALARM EVENTS ===");
+    buffer.writeln("Timestamp,Severity,Address,Value,Message");
+    for (final l in alarms) {
+      final dt = DateTime.fromMillisecondsSinceEpoch(l.timestamp.toInt());
+      buffer.writeln("${dt.toIso8601String()},${l.severity},${l.registerAddress},${l.value},\"${l.message}\"");
+    }
+    
+    return buffer.toString();
   }
 
   void _log(String message) {

@@ -53,6 +53,19 @@ void main() {
       final state = container.read(scriptingProvider);
       expect(state.logs, isEmpty);
     });
+
+    test('evaluateScript mock runs exportReport successfully', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(scriptingProvider.notifier);
+      notifier.setCode('Modbus.exportReport("pdf", 12);');
+      await notifier.evaluateScriptManual();
+
+      final state = container.read(scriptingProvider);
+      expect(state.logs.first, contains('Script executed successfully'));
+      expect(state.logs[1], contains('JS Report Exporter (Mock)'));
+    });
   });
 
   group('ScriptingScreen Widget Tests', () {

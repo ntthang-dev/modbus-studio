@@ -1,6 +1,7 @@
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:modbus_studio/src/rust/api/db.dart';
+import 'package:modbus_studio/src/rust/api/historian.dart';
 
 class PdfReportHelper {
   static Future<pw.Document> generateReport({
@@ -179,6 +180,121 @@ class PdfReportHelper {
                 headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: PdfColors.white),
                 headerDecoration: const pw.BoxDecoration(color: PdfColors.grey800),
                 cellStyle: const pw.TextStyle(fontSize: 9),
+                cellAlignment: pw.Alignment.centerLeft,
+              ),
+          ];
+        },
+      ),
+    );
+
+    return pdf;
+  }
+
+  static Future<pw.Document> generateHistoricalReport({
+    required String deviceName,
+    required String protocolType,
+    required List<HistorianPoint> telemetryPoints,
+    required List<AlarmLog> alarmLogs,
+    required DateTime startRange,
+    required DateTime endRange,
+  }) async {
+    final pdf = pw.Document();
+
+    final teleRows = telemetryPoints.map((p) {
+      final dt = DateTime.fromMillisecondsSinceEpoch(p.timestampMs.toInt());
+      final timeStr = '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+      return [
+        timeStr,
+        p.address.toString(),
+        p.value.toString(),
+      ];
+    }).toList();
+
+    final logRows = alarmLogs.map((l) {
+      final dt = DateTime.fromMillisecondsSinceEpoch(l.timestamp.toInt());
+      final timeStr = '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+      return [
+        timeStr,
+        l.severity,
+        l.registerAddress.toString(),
+        l.value.toString(),
+        l.message,
+      ];
+    }).toList();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (pw.Context context) {
+          return [
+            // Report Header
+            pw.Header(
+              level: 0,
+              child: pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'MODBUS STUDIO HISTORICAL REPORT',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 18,
+                          color: PdfColors.teal,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        'Range: ${startRange.toString().substring(0, 16)} to ${endRange.toString().substring(0, 16)}',
+                        style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                      ),
+                    ],
+                  ),
+                  pw.Text(
+                    'Device: $deviceName ($protocolType)',
+                    style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                  ),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 16),
+
+            // Section 1: Telemetry Logs
+            pw.Text('1. Historical Telemetry Logs', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 13)),
+            pw.SizedBox(height: 8),
+            if (teleRows.isEmpty)
+              pw.Text('No telemetry data logged in this range.', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700))
+            else
+              pw.TableHelper.fromTextArray(
+                headers: ['Timestamp', 'Register Address', 'Polled Value'],
+                data: teleRows,
+                border: pw.TableBorder.all(color: PdfColors.grey200, width: 0.5),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: PdfColors.white),
+                headerDecoration: const pw.BoxDecoration(color: PdfColors.teal),
+                cellStyle: const pw.TextStyle(fontSize: 9),
+                rowDecoration: const pw.BoxDecoration(color: PdfColors.white),
+                oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey50),
+                cellAlignment: pw.Alignment.centerLeft,
+              ),
+            pw.SizedBox(height: 24),
+
+            // Section 2: Alarm History
+            pw.Text('2. Historical Alarm Events', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 13)),
+            pw.SizedBox(height: 8),
+            if (logRows.isEmpty)
+              pw.Text('No alarm events logged in this range.', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700))
+            else
+              pw.TableHelper.fromTextArray(
+                headers: ['Timestamp', 'Severity', 'Address', 'Value', 'Message'],
+                data: logRows,
+                border: pw.TableBorder.all(color: PdfColors.grey200, width: 0.5),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9, color: PdfColors.white),
+                headerDecoration: const pw.BoxDecoration(color: PdfColors.grey800),
+                cellStyle: const pw.TextStyle(fontSize: 9),
+                rowDecoration: const pw.BoxDecoration(color: PdfColors.white),
+                oddRowDecoration: const pw.BoxDecoration(color: PdfColors.grey50),
                 cellAlignment: pw.Alignment.centerLeft,
               ),
           ];
