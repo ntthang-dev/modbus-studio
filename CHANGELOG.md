@@ -41,6 +41,8 @@ This is the initial production-ready release of Modbus Studio, an industrial-gra
 - Refactored `ConnectionNotifier` and local storage providers to share a unified database client lifecycle.
 - Optimized telemetry poll intervals with a native thread pool to isolate serial block latencies.
 - Standardized UI spacing and navigation layout via a responsive [ResponsiveNavigationShell](file:///Users/ristresso/Developers/modbus_scan/modbus_scada_app/lib/features/navigation/responsive_navigation_shell.dart).
+- **Database Query Optimizations**:
+  - Optimized `get_telemetry_logs_by_range` by rewriting the SQLite query to be sargable (removed `strftime` and cast functions from the `WHERE` clause on the `timestamp` column). This allows the query engine to perform O(log N) index range scans rather than full-table scans, drastically reducing cpu/io latency on larger telemetry databases.
 
 ### Fixed
 - Fixed compilation and syntax errors inside [ConnectionHubScreen](file:///Users/ristresso/Developers/modbus_scan/modbus_scada_app/lib/features/hub/connection_hub_screen.dart) relating to missing greeting helpers.

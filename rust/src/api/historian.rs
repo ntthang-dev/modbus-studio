@@ -135,8 +135,8 @@ pub fn get_telemetry_logs_by_range(
     let mut stmt = conn.prepare(
         "SELECT ip_address, address, value, CAST(strftime('%s', timestamp) AS INTEGER) * 1000 
          FROM poll_logs 
-         WHERE (CAST(strftime('%s', timestamp) AS INTEGER) * 1000) >= ?1 
-           AND (CAST(strftime('%s', timestamp) AS INTEGER) * 1000) <= ?2 
+         WHERE timestamp >= datetime(?1 / 1000, 'unixepoch')
+           AND timestamp <= datetime(?2 / 1000, 'unixepoch')
          ORDER BY id DESC"
     )?;
     
