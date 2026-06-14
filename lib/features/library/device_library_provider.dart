@@ -3,6 +3,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modbus_studio/src/rust/api/db.dart';
 
+class ProfileImportException implements Exception {
+  final String message;
+  ProfileImportException(this.message);
+  @override
+  String toString() => message;
+}
+
 class DevicePreset {
   final String name;
   final String description;
@@ -109,12 +116,57 @@ class DeviceLibraryNotifier extends Notifier<DeviceLibraryState> {
   // Parses a JSON profile config and populates configuration
   Map<String, dynamic>? importJson(String jsonStr) {
     try {
-      final data = json.decode(jsonStr) as Map<String, dynamic>;
-      final name = data['name'] as String;
-      final configMap = data['config'] as Map<String, dynamic>;
+      dynamic decoded;
+      try {
+        decoded = json.decode(jsonStr);
+      } catch (e) {
+        throw ProfileImportException("Invalid JSON syntax: ${e.toString()}");
+      }
       
+      if (decoded is! Map<String, dynamic>) {
+        throw ProfileImportException("JSON must be a key-value object structure.");
+      }
+      final data = decoded;
+      
+      if (!data.containsKey('name')) {
+        throw ProfileImportException("Missing required 'name' field.");
+      }
+      if (data['name'] is! String) {
+        throw ProfileImportException("'name' must be a text string.");
+      }
+      final name = data['name'] as String;
+
+      if (!data.containsKey('config')) {
+        throw ProfileImportException("Missing required 'config' field.");
+      }
+      if (data['config'] is! Map<String, dynamic>) {
+        throw ProfileImportException("'config' must be a key-value object.");
+      }
+      final configMap = data['config'] as Map<String, dynamic>;
+
+      if (!configMap.containsKey('protocolType')) {
+        throw ProfileImportException("Missing required 'protocolType' under 'config'.");
+      }
+      if (configMap['protocolType'] is! String) {
+        throw ProfileImportException("'protocolType' must be a text string ('TCP', 'RTU_TCP', or 'SERIAL').");
+      }
+      final protocolType = configMap['protocolType'] as String;
+      if (protocolType != 'TCP' && protocolType != 'RTU_TCP' && protocolType != 'SERIAL') {
+        throw ProfileImportException("Invalid 'protocolType' '$protocolType'. Must be 'TCP', 'RTU_TCP', or 'SERIAL'.");
+      }
+
+      if (configMap.containsKey('port') && configMap['port'] != null) {
+        if (configMap['port'] is! int) {
+          throw ProfileImportException("'port' must be an integer.");
+        }
+        final port = configMap['port'] as int;
+        if (port < 1 || port > 65535) {
+          throw ProfileImportException("Port number $port is out of bounds (1-65535).");
+        }
+      }
+
       final config = ConnectionConfig(
-        protocolType: configMap['protocolType'] as String,
+        protocolType: protocolType,
         ip: configMap['ip'] as String?,
         port: configMap['port'] as int?,
         portName: configMap['portName'] as String?,
@@ -128,9 +180,13 @@ class DeviceLibraryNotifier extends Notifier<DeviceLibraryState> {
       final tags = <int, String>{};
       tagsMapRaw.forEach((k, v) {
         final addr = int.tryParse(k);
-        if (addr != null) {
-          tags[addr] = v.toString();
+        if (addr == null) {
+          throw ProfileImportException("Invalid register address key '$k'. Must be an integer.");
         }
+        if (addr < 1 || addr > 65535) {
+          throw ProfileImportException("Register address $addr is out of bounds (1-65535).");
+        }
+        tags[addr] = v.toString();
       });
 
       state = state.copyWith(
@@ -142,9 +198,10 @@ class DeviceLibraryNotifier extends Notifier<DeviceLibraryState> {
         'name': name,
         'config': config,
       };
+    } on ProfileImportException {
+      rethrow;
     } catch (e) {
-      debugPrint("Error importing profile JSON: $e");
-      return null;
+      throw ProfileImportException("Error parsing preset profile: $e");
     }
   }
 

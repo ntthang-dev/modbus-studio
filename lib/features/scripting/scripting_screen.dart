@@ -18,10 +18,10 @@ class ScriptingScreen extends HookConsumerWidget {
     // Styling
     final bool isField = uiState.isFieldMode;
     final Color backgroundColor = isField ? CupertinoColors.lightBackgroundGray : const Color(0xFF0A0A0C);
-    final Color cardColor = isField ? CupertinoColors.white : const Color(0xFF141419);
+    final Color cardColor = isField ? CupertinoColors.white : const Color(0xFF121216);
     final Color textColor = isField ? CupertinoColors.black : CupertinoColors.white;
     final Color subtextColor = isField ? CupertinoColors.systemGrey2 : CupertinoColors.systemGrey;
-    final Color borderColor = isField ? CupertinoColors.systemGrey4 : const Color(0xFF23232C);
+    final Color borderColor = isField ? CupertinoColors.systemGrey4 : const Color(0xFF1F1F24);
 
     final codeController = useTextEditingController(text: scriptingState.code);
 

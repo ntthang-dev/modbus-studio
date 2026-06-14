@@ -80,7 +80,7 @@ void main() {
       expect(state.activeTags[40002], 'Pressure Log');
     });
 
-    test('importJson returns null for invalid JSON structure', () {
+    test('importJson throws ProfileImportException for invalid JSON structure', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
@@ -89,8 +89,10 @@ void main() {
       // Missing required name and config fields
       const jsonPayload = '{"tags": {}}';
 
-      final result = notifier.importJson(jsonPayload);
-      expect(result, isNull);
+      expect(
+        () => notifier.importJson(jsonPayload),
+        throwsA(isA<ProfileImportException>()),
+      );
     });
 
     test('exportPreset serializes preset to expected JSON format', () {
