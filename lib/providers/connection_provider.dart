@@ -32,7 +32,7 @@ class ConnectionStatus {
     this.writeResult,
     this.functionCode = 3,
     this.startAddress = 0,
-    this.quantity = 10,
+    this.quantity = 100,
   });
 
   ConnectionStatus copyWith({
@@ -101,7 +101,12 @@ class ConnectionNotifier extends Notifier<ConnectionStatus> {
     if (state.isConnected && state.activeIp == deviceKey) return;
 
     _cleanup();
-    state = ConnectionStatus(activeIp: deviceKey, activeConfig: config, isConnecting: true);
+    state = ConnectionStatus(
+      activeIp: deviceKey,
+      activeConfig: config,
+      isConnecting: true,
+      quantity: 100,
+    );
 
     try {
       // 1. Connect the command client
